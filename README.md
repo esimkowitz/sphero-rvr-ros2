@@ -1,6 +1,6 @@
 # Containerized RO2 Node for Sphero RVR
 
-Pyhton3 based [ROS2](https://docs.ros.org/en/foxy/#) node for interacting with [Sphero RVR](https://www.sphero.com/rvr).
+Pyhton3 based [ROS2](https://docs.ros.org/en/humble/#) node for interacting with [Sphero RVR](https://www.sphero.com/rvr).
 
 Runs in Docker for easy integration and streamlined dependency management.
 
