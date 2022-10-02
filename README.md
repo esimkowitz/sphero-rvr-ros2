@@ -113,4 +113,12 @@ def subscribe():
 
 ```
 
+## Credit
 
+Thank you [@DomnikN](https://github.com/DominikN) for your very well documented project [DominikN/ros2_docker_examples](https://github.com/DominikN/ros2_docker_examples).
+
+Thank you [@gumstix/Altium](https://github.com/gumstix) for your [RVR ROS2 Node demo](https://github.com/gumstix/PKG900000001506/tree/master/demo/Sphero%20RVR/ros2%20node).
+
+## License
+
+MIT &copy; Evan Simkowitz, 2022
