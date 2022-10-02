@@ -1,0 +1,3 @@
+[submodule "src/sphero-sdk-raspberry-python"]
+	path = src/sphero-sdk-raspberry-python
+	url = https://github.com/sphero-inc/sphero-sdk-raspberrypi-python.git
