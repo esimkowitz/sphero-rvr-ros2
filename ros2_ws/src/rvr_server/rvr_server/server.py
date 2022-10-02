@@ -9,6 +9,8 @@ For any question/concerns regarding the work please contact Harnoor Singh at har
 import os
 import sys
 import asyncio
+sys.path.append('/app/sphero-sdk/sphero-sdk-raspberrypi-python') 
+
 from sphero_sdk import SpheroRvrAsync
 from sphero_sdk import SerialAsyncDal
 from sphero_sdk import RvrStreamingServices
