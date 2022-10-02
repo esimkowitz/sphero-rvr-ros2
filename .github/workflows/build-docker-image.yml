@@ -26,10 +26,19 @@ jobs:
       uses: docker/setup-qemu-action@v2.0.0
       with:
         platforms: arm64
-    - name: Build and push Docker images
-      uses: docker/build-push-action@v3.1.1
+    
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: esimkowitz/sphero-rvr-ros2
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v3
       with:
         context: .
         file: Dockerfile
         platforms: arm64
-        tags: "esimkowitz/sphero-rvr-ros2:latest"
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
