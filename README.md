@@ -1,6 +1,7 @@
-# RO2 Node for Sphero RVR
+# Containerized RO2 Node for Sphero RVR
 Pyhton3 based [ROS2](https://docs.ros.org/en/foxy/#) node for interacting with [Sphero RVR](https://www.sphero.com/rvr).
 
+Runs in Docker for easy integration and streamlined dependency management.
 
 ## Current Functionality
 - Stream Sensors Data
@@ -12,11 +13,9 @@ Pyhton3 based [ROS2](https://docs.ros.org/en/foxy/#) node for interacting with [
 - Change LED color
     - `change_leds` subscriber can be used to change the color of all the LEDs on the RVR.
 
-
 ## Running the ROS2 Node
 - `python3 server.py your_serial_port` to run the ROS2 node.
 - eg: `python3 server.py /dev/ttyAMA1` 
-
 
 ## Subscribing to sensors channel
 This piece of code is a snip from `test_talker.py` and will simply print the data coming in from the `sensors` publisher
@@ -36,8 +35,8 @@ def subscribe():
     ## subscribe to sensors
     rclpy.init(args=None)
     rclpy.spin(minimal_subscriber)
-
 ```
+
 ## Publishing commands
 
 Note: Make sure to publish data in a Float32Array to drive and led change subscribers.
@@ -78,6 +77,7 @@ class MinimalPublisher(Node):
         self.publish_leds.publish(msg)
         if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
 ```
+
 ## Removing/Subscribing to sensors
 Initially, data from all 5 sensors are being published on the `sensors` channel but this could be altered according to the requirements. `remove_sensor_name` and `subscribe_sensor_name` can be used to update the sensors stream.
 
@@ -110,7 +110,6 @@ def remove():
 def subscribe():
     arr = []
     minimal_publisher.subscribe_IMU_handler(arr)
-
 ```
 
 ## Credit
