@@ -1,9 +1,11 @@
 # Containerized RO2 Node for Sphero RVR
+
 Pyhton3 based [ROS2](https://docs.ros.org/en/foxy/#) node for interacting with [Sphero RVR](https://www.sphero.com/rvr).
 
 Runs in Docker for easy integration and streamlined dependency management.
 
 ## Current Functionality
+
 - Stream Sensors Data
     - Data from in total 5 sensors (IMU, accelerometer, color_detection, ambient_light, and encoders) is published on the `sensors` channel.
     - The delay of sensors stream can be updated using `update_delay` subscriber.
@@ -14,10 +16,12 @@ Runs in Docker for easy integration and streamlined dependency management.
     - `change_leds` subscriber can be used to change the color of all the LEDs on the RVR.
 
 ## Running the ROS2 Node
+
 - `python3 server.py your_serial_port` to run the ROS2 node.
 - eg: `python3 server.py /dev/ttyAMA1` 
 
 ## Subscribing to sensors channel
+
 This piece of code is a snip from `test_talker.py` and will simply print the data coming in from the `sensors` publisher
 ```
 class MinimalSubscriber(Node):
@@ -79,6 +83,7 @@ class MinimalPublisher(Node):
 ```
 
 ## Removing/Subscribing to sensors
+
 Initially, data from all 5 sensors are being published on the `sensors` channel but this could be altered according to the requirements. `remove_sensor_name` and `subscribe_sensor_name` can be used to update the sensors stream.
 
 
