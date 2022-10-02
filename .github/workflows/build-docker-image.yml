@@ -20,12 +20,14 @@ jobs:
         username: esimkowitz
         password: ${{ secrets.DOCKER_HUB_ESIMKOWITZ_PAT }}
         # Log out from the Docker registry at the end of a job
+    - name: Docker Setup QEMU
+      uses: docker/setup-qemu-action@v2.0.0
+      with:
+        platforms: arm64
     - name: Build and push Docker images
       uses: docker/build-push-action@v3.1.1
       with:
-        # Build's context is the set of files located in the specified PATH or URL
         context: .
-        # Path to the Dockerfile
         file: Dockerfile
-        # List of tags
+        platforms: arm64
         tags: "esimkowitz/sphero-rvr-ros2:latest"
