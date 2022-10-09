@@ -435,9 +435,7 @@ if __name__ == '__main__':
         rvr = SpheroRvrAsync(
             dal=SerialAsyncDal(loop,port_id=args[0])
         ) 
-        asyncio.ensure_future(
-            main()
-        )
+        loop.create_task(main())
         loop.run_forever()
 
     except KeyboardInterrupt:
