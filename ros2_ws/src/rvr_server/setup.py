@@ -19,7 +19,7 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            "rvr_server = rvr_server.server:main",
+            "rvr_server = rvr_server.sphero_node:main",
         ],
     },
 )

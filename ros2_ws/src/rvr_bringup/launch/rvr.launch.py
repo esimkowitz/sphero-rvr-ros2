@@ -6,7 +6,7 @@ def generate_launch_description():
 
     rvr_server_node = Node(
         package="rvr_server",
-        executable="server"
+        executable="sphero_node"
     )
 
     ld.add_action(rvr_server_node)
