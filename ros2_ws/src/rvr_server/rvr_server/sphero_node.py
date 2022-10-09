@@ -9,7 +9,7 @@ For any question/concerns regarding the work please contact Harnoor Singh at har
 import os
 import sys
 import asyncio
-sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberrypi-python')) 
+sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python')) 
 
 from sphero_sdk import SpheroRvrAsync
 from sphero_sdk import SerialAsyncDal
