@@ -6,6 +6,8 @@ Runs in Docker for easy integration and streamlined dependency management.
 
 [![Docker Image CI](https://github.com/esimkowitz/sphero-rvr-ros2/actions/workflows/build-docker-image.yml/badge.svg)](https://github.com/esimkowitz/sphero-rvr-ros2/actions/workflows/build-docker-image.yml)
 
+** This is a VERY early work in progress **
+
 ## Current Functionality
 
 - Stream Sensors Data
