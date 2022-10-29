@@ -23,6 +23,28 @@ debug = False
 
 received = 0x00     # received byte - fully received at 0x1f
 
+class SpheroNode(Node):
+    def __init__(self, rvr :SpheroRvrObserver) -> None:
+        super().__init__('sphero_node')
+        self.rvr = rvr
+        self.update_leds = self.create_subscription(
+            Float32MultiArray,
+            'change_leds',   
+            self.set_leds,
+            10)
+
+    def set_leds(self, msg):
+        self.get_logger().info('I heard: "%s"' % msg.data)
+        if debug: print("heard")
+        led_data = msg.data
+        R = int(led_data[0])
+        G = int(led_data[1])
+        B = int(led_data[2])
+        self.rvr.set_all_leds(
+            led_group=RvrLedGroups.all_lights.value,
+            led_brightness_values=[color for x in range(10) for color in [R, G, B]]
+        )
+
 
 def main(args=None):
     """ This program demonstrates how to enable multiple sensors to stream."""
@@ -34,11 +56,13 @@ def main(args=None):
 
     # Give RVR time to wake up
     time.sleep(2)
-    rvr.set_all_leds(
-        led_group=RvrLedGroups.all_lights.value,
-        led_brightness_values=[color for x in range(10) for color in [0, 255, 0]]
-    )
-    rvr.sensor_control.stop()
+
+    sphero_node = SpheroNode()
+
+    rclpy.spin(sphero_node)
+
+    rvr.sensor_control.clear(),
+    rvr.close()
 
     rclpy.shutdown()
 
