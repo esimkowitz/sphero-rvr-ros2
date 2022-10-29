@@ -12,6 +12,7 @@ import time
 sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python')) 
 
 from sphero_sdk import SpheroRvrObserver
+from sphero_sdk import RvrLedGroups
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Int8MultiArray
