@@ -1,6 +1,6 @@
 FROM arm64v8/ros:humble-ros-base
 SHELL [ "/bin/bash", "-c" ]
-RUN apt-get update && apt-get install -y python3 python3-pip
+RUN apt-get update && apt-get install -y python3 python3-pip tmux
 ENV PYTHONWARNINGS ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources
 
 COPY . /app
