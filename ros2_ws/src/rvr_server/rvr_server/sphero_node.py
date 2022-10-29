@@ -46,7 +46,7 @@ class SpheroNode(Node):
         self.update_leds = self.create_subscription(
             Float32MultiArray,
             'rvr_change_leds',   
-            lambda msg :asyncio.run_coroutine_threadsafe(self.set_leds(msg), self.loop),
+            self.set_leds,
             10)
 
     async def set_leds(self, msg):
@@ -56,10 +56,10 @@ class SpheroNode(Node):
         R = int(led_data[0])
         G = int(led_data[1])
         B = int(led_data[2])
-        await self.rvr.set_all_leds(
+        self.loop.run_until_complete(self.rvr.set_all_leds(
             led_group=RvrLedGroups.all_lights.value,
             led_brightness_values=[color for x in range(10) for color in [R, G, B]]
-        )
+        ))
 
 
 def main(args=None):
