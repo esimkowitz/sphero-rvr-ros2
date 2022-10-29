@@ -46,7 +46,7 @@ class SpheroNode(Node):
         self.update_leds = self.create_subscription(
             Float32MultiArray,
             'rvr_change_leds',   
-            asyncio.run_coroutine_threadsafe(self.set_leds, self.loop),
+            lambda msg :asyncio.run_coroutine_threadsafe(self.set_leds(msg), self.loop),
             10)
 
     async def set_leds(self, msg):
@@ -64,7 +64,7 @@ class SpheroNode(Node):
 
 def main(args=None):
     """ This program demonstrates how to enable multiple sensors to stream."""
-    loop = asyncio.new_event_loop()
+    loop = asyncio.get_event_loop()
     rvr = SpheroRvrAsync(
         dal=SerialAsyncDal(
             loop
@@ -78,7 +78,7 @@ def main(args=None):
     # Give RVR time to wake up
     loop.run_until_complete(asyncio.sleep(2))
 
-    sphero_node = SpheroNode(rvr)
+    sphero_node = SpheroNode(rvr, loop)
 
     rclpy.spin(sphero_node)
 
@@ -86,8 +86,6 @@ def main(args=None):
     rvr.close()
 
     rclpy.shutdown()
-
-    loop.close()
 
 if __name__ == '__main__':
     main()
