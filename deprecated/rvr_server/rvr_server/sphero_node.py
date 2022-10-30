@@ -9,7 +9,7 @@ For any question/concerns regarding the work please contact Harnoor Singh at har
 import os
 import sys
 import asyncio
-sys.path.append('/app/sphero-sdk/sphero-sdk-raspberrypi-python') 
+sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python')) 
 
 from sphero_sdk import SpheroRvrAsync
 from sphero_sdk import SerialAsyncDal
@@ -435,9 +435,7 @@ if __name__ == '__main__':
         rvr = SpheroRvrAsync(
             dal=SerialAsyncDal(loop,port_id=args[0])
         ) 
-        asyncio.ensure_future(
-            main()
-        )
+        loop.create_task(main())
         loop.run_forever()
 
     except KeyboardInterrupt:

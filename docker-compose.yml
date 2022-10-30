@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+    rvr_server:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        image: esimkowitz/sphero-rvr-ros2:latest
+        privileged: true
+        stdin_open: true # docker run -i
+        tty: true        # docker run -t
+        command: ros2 launch rvr_bringup rvr.launch.py
+        volumes:
+          - /dev/ttyS0:/dev/ttyS0
