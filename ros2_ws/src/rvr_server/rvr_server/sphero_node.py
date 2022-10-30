@@ -17,8 +17,7 @@ from sphero_sdk import RvrLedGroups
 from sphero_sdk import SerialAsyncDal
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String, Int8MultiArray
-from std_msgs.msg import Float32MultiArray
+import std_msgs.msg
 import json
 
 debug = False
@@ -40,26 +39,83 @@ class SpheroNode(Node):
         self.rvr = rvr
         self.loop = loop
         self.publisher_ = self.create_publisher(
-            String,
+            std_msgs.msg.String,
             'rvr_sensors',  # publish to chatter channel
             10)
-        self.update_leds = self.create_subscription(
-            Float32MultiArray,
+        self.set_leds_sub = self.create_subscription(
+            std_msgs.msg.Float32MultiArray,
             'rvr_change_leds',   
             self.set_leds,
             10)
+        self.start_roll_sub = self.create_subscription(
+            std_msgs.msg.Float32MultiArray,
+            'rvr_start_roll',   
+            self.start_roll,
+            10)
+        self.stop_roll_sub = self.create_subscription(
+            std_msgs.msg.Float32,
+            'rvr_stop_roll',
+            self.stop_roll,
+            10)
+        self.set_heading_sub = self.create_subscription(
+            std_msgs.msg.Float32,
+            'rvr_set_heading',
+            self.set_heading,
+            10)
+        self.reset_heading = self.create_subscription(
+            std_msgs.msg.Empty,
+            'rvr_reset_heading',
+            self.reset_heading,
+            10)
 
-    async def set_leds(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg.data)
+    def start_roll(self, msg):
+        self.get_logger().info('start_roll: "%s"' % msg.data)
+        speed = int(msg.data[0])
+        heading = int(msg.data[1])
+        self.loop.run_until_complete(
+            self.rvr.drive_control.roll_start(
+                speed=speed,
+                heading=heading
+            )
+        )
+
+    def stop_roll(self, msg):
+        self.get_logger().info('stop_roll: "%s"' % msg.data)
+        heading = int(msg.data)
+        self.loop.run_until_complete(
+            self.rvr.drive_control.roll_stop(
+                heading=heading
+            )
+        )
+
+    def set_heading(self, msg):
+        self.get_logger().info('set_heading: "%s"' % msg.data)
+        heading = int(msg.data)
+        self.loop.run_until_complete(
+            self.rvr.drive_control.set_heading(
+                heading=heading
+            )
+        )
+    
+    def reset_heading(self, msg):
+        self.get_logger().info('reset_heading')
+        self.loop.run_until_complete(
+            self.rvr.drive_control.reset_heading()
+        )
+
+    def set_leds(self, msg):
+        self.get_logger().info('set_leds: "%s"' % msg.data)
         if debug: print("heard")
         led_data = msg.data
         R = int(led_data[0])
         G = int(led_data[1])
         B = int(led_data[2])
-        self.loop.run_until_complete(self.rvr.set_all_leds(
-            led_group=RvrLedGroups.all_lights.value,
-            led_brightness_values=[color for x in range(10) for color in [R, G, B]]
-        ))
+        self.loop.run_until_complete(
+            self.rvr.set_all_leds(
+                led_group=RvrLedGroups.all_lights.value,
+                led_brightness_values=[color for x in range(10) for color in [R, G, B]]
+            )
+        )
 
 
 def main(args=None):
@@ -77,6 +133,7 @@ def main(args=None):
 
     # Give RVR time to wake up
     loop.run_until_complete(asyncio.sleep(2))
+    loop.run_until_complete(rvr.drive_control.reset_heading())
 
     sphero_node = SpheroNode(rvr, loop)
 
