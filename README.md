@@ -18,9 +18,6 @@ Runs in Docker for easy integration and streamlined dependency management.
 
 ## Running the ROS2 Node
 
-- `python3 server.py your_serial_port` to run the ROS2 node.
-- eg: `python3 server.py /dev/ttyAMA1` 
-
 For now I am running the Docker container in interactive mode so that I can start a TMux session and quickly evaluate changes. I am using the following commands to do this:
 
 ```Bash
