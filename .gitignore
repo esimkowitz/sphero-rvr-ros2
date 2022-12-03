@@ -172,3 +172,7 @@ dmypy.json
  
 # Cython debug symbols
 cython_debug/
+
+# ROS 2
+ros2_ws/src/install/
+ros2_ws/src/log/

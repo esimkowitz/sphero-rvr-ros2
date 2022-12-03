@@ -12,6 +12,7 @@ import time
 sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python')) 
 
 import asyncio
+from stopwatch import Stopwatch
 from sphero_sdk import SpheroRvrAsync
 from sphero_sdk import RvrLedGroups
 from sphero_sdk import SerialAsyncDal
@@ -69,6 +70,8 @@ class SpheroNode(Node):
             10)
 
     def start_roll(self, msg):
+        stopwatch = Stopwatch(3)
+        stopwatch.start()
         self.get_logger().info('start_roll: "%s"' % msg.data)
         speed = int(msg.data[0])
         heading = int(msg.data[1])
@@ -78,8 +81,11 @@ class SpheroNode(Node):
                 heading=heading
             )
         )
+        self.get_logger().info('start_roll end %5.4f' % stopwatch.duration)
 
     def stop_roll(self, msg):
+        stopwatch = Stopwatch(3)
+        stopwatch.start()
         self.get_logger().info('stop_roll: "%s"' % msg.data)
         heading = int(msg.data)
         self.loop.run_until_complete(
@@ -87,8 +93,11 @@ class SpheroNode(Node):
                 heading=heading
             )
         )
+        self.get_logger().info('stop_roll end %5.4f' % stopwatch.duration)
 
     def set_heading(self, msg):
+        stopwatch = Stopwatch(3)
+        stopwatch.start()
         self.get_logger().info('set_heading: "%s"' % msg.data)
         heading = int(msg.data)
         self.loop.run_until_complete(
@@ -96,14 +105,20 @@ class SpheroNode(Node):
                 heading=heading
             )
         )
+        self.get_logger().info('set_heading end %5.4f' % stopwatch.duration)
     
     def reset_heading(self, msg):
+        stopwatch = Stopwatch(3)
+        stopwatch.start()
         self.get_logger().info('reset_heading')
         self.loop.run_until_complete(
             self.rvr.drive_control.reset_heading()
         )
+        self.get_logger().info('reset_heading end %5.4f' % stopwatch.duration)
 
     def set_leds(self, msg):
+        stopwatch = Stopwatch(3)
+        stopwatch.start()
         self.get_logger().info('set_leds: "%s"' % msg.data)
         if debug: print("heard")
         led_data = msg.data
@@ -116,7 +131,7 @@ class SpheroNode(Node):
                 led_brightness_values=[color for x in range(10) for color in [R, G, B]]
             )
         )
-
+        self.get_logger().info('set_leds end %5.4f' % stopwatch.duration)
 
 def main(args=None):
     """ This program demonstrates how to enable multiple sensors to stream."""

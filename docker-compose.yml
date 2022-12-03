@@ -7,8 +7,6 @@ services:
             dockerfile: Dockerfile
         image: esimkowitz/sphero-rvr-ros2:latest
         privileged: true
-        stdin_open: true # docker run -i
-        tty: true        # docker run -t
-        command: ros2 launch rvr_bringup rvr.launch.py
+        command: ros2 launch rvr_bringup server.launch.py
         volumes:
           - /dev/ttyS0:/dev/ttyS0

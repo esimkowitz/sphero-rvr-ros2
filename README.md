@@ -16,7 +16,7 @@ Runs in Docker for easy integration and streamlined dependency management.
 - Change the RVR heading using the `rvr_set_heading` topic.
 - Reset the RVR heading using the `rvr_reset_heading` topic.
 
-## Running the ROS2 Node
+## Running directly via Docker
 
 For now I am running the Docker container in interactive mode so that I can start a TMux session and quickly evaluate changes. I am using the following commands to do this:
 
@@ -25,6 +25,32 @@ docker run -it --rm -v /dev/ttyS0:/dev/ttyS0 --privileged esimkowitz/sphero-rvr-
 ```
 
 I have noticed that the exec shell will exit whenever there is a nonzero exit code for a command so I've gotten into the habit of starting a sh session and then another bash session within that, that way if bash exits I can quickly restart it. Otherwise, the container will close on any nonzero error code.
+
+## Running via Docker Compose
+
+I've added a [docker-compose.yml](docker-compose.yml) file to run the ROS2 node in the background. You can run it via 
+
+### Run and build via script
+
+I've added a shell script that can build the image before starting the Docker Compose for easier development: [run_docker_compose.sh](run_docker_compose.sh).
+
+## Run using pre-built image via Docker Compose
+
+```Bash
+sudo docker compose up
+```
+
+## Publish commands to node
+
+You can publish commands by opening a Bash shell on the container running in Docker Compose.
+
+To start the Bash shell, run the following command:
+
+```Bash
+sudo docker compose exec rvr_server bash
+```
+
+Then, you can use the commands in the [test_commands.sh](test_commands.sh) file to publish commands to the running node.
 
 ## Credit
 
