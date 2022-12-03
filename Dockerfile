@@ -16,5 +16,5 @@ RUN cd ros2_ws && \
     source /opt/ros/humble/setup.bash && \
     colcon build
 
-RUN rm /ros_entrypoint.sh && chmod +x /app/ros_entrypoint.sh && echo "source /app/ros_entrypoint.sh" >> ~/.bashrc
+RUN rm /ros_entrypoint.sh && echo "source /app/ros_entrypoint.sh" >> ~/.bashrc
 ENTRYPOINT [ "/app/ros_entrypoint.sh" ]
