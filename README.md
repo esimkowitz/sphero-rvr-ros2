@@ -34,7 +34,7 @@ I've added a [docker-compose.yml](docker-compose.yml) file to run the ROS2 node 
 
 I've added a shell script that can build the image before starting the Docker Compose for easier development: [run_docker_compose.sh](run_docker_compose.sh).
 
-## Run using pre-built image via Docker Compose
+### Run using pre-built image
 
 ```Bash
 sudo docker compose up
