@@ -4,6 +4,8 @@
 # GitHub repo.
 # Modified by Evan Simkowitz (esimkowitz@wustl.edu), July 2017
 
+# Does not work, need to clean up bits from old setup, get logic working so that it can send messages over the ROS publisher
+
 
 import argparse
 from flask import Flask, render_template, session, request, Response
