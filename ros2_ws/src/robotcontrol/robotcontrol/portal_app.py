@@ -133,8 +133,6 @@ def control_event():
 
 
 def main():
-    server = Server()
-
     def endProcess(signum=None, frame=None):
         # Called on process termination.
         if signum is not None:
@@ -143,10 +141,6 @@ def main():
             print("signal {} received by process with PID {}".format(
                 SIGNAL_NAMES_DICT[signum], os.getpid()))
         print("\n-- Terminating program --")
-        print("Cleaning up Server...")
-        server.cleanup()
-        robot.stop()
-        print("Done.")
         os._exit(0)
 
     # Assign handler for process exit
