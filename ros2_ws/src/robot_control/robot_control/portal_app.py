@@ -66,6 +66,9 @@ class RosPublisher(Node):
     def log_debug(self, msg):
         if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
 
+rclpy.init(args=None)
+ros_publisher = RosPublisher()
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -75,32 +78,29 @@ def control_event():
     if request.method == 'POST':
         control = request.form['control']
         if control == 'f':
-            server.ros_publisher.rvr_start_roll([30.0, 0.0])
-            server.ros_publisher.get_logger().info('robot forward')
+            ros_publisher.rvr_start_roll([30.0, 0.0])
+            ros_publisher.get_logger().info('robot forward')
         elif control == 'b':
-            server.ros_publisher.rvr_start_roll([30.0, 180.0])
-            server.ros_publisher.get_logger().info('robot backward')
+            ros_publisher.rvr_start_roll([30.0, 180.0])
+            ros_publisher.get_logger().info('robot backward')
         elif control == 'l':
-            server.ros_publisher.rvr_start_roll([30.0, 270.0])
-            server.ros_publisher.get_logger().info('robot left')
+            ros_publisher.rvr_start_roll([30.0, 270.0])
+            ros_publisher.get_logger().info('robot left')
         elif control == 'r':
-            server.ros_publisher.rvr_start_roll([30.0, 90.0])
-            server.ros_publisher.get_logger().info('robot right')
+            ros_publisher.rvr_start_roll([30.0, 90.0])
+            ros_publisher.get_logger().info('robot right')
         elif control == 's':
-            server.ros_publisher.rvr_stop_roll(0.0)
-            server.ros_publisher.get_logger().info('robot stop')
+            ros_publisher.rvr_stop_roll(0.0)
+            ros_publisher.get_logger().info('robot stop')
     return 'OK'
 
 class Server():
-    def __init__(self, args):
-        rclpy.init(args=args)
+    def __init__(self):
         self.flask_server = make_server(
             '', 8080,
             app=app)
         self.flask_thread = Thread(
             target=self.flask_server.serve_forever)
-
-        self.ros_publisher = RosPublisher()
 
     def cleanup(self):
         print('Shutting down Flask server')
@@ -109,8 +109,8 @@ class Server():
         self.flask_thread.join()
         rclpy.shutdown()
 
-def main(args=None):
-    def endProcess(signum=None, frame=None):
+def main():
+    def end_process(signum=None):
         # Called on process termination.
         if signum is not None:
             SIGNAL_NAMES_DICT = dict((getattr(signal, n), n) for n in dir(
@@ -122,13 +122,12 @@ def main(args=None):
         os._exit(0)
 
     # Assign handler for process exit
-    signal.signal(signal.SIGTERM, endProcess)
-    signal.signal(signal.SIGINT, endProcess)
-    signal.signal(signal.SIGHUP, endProcess)
-    signal.signal(signal.SIGQUIT, endProcess)
+    signal.signal(signal.SIGTERM, end_process)
+    signal.signal(signal.SIGINT, end_process)
+    signal.signal(signal.SIGHUP, end_process)
+    signal.signal(signal.SIGQUIT, end_process)
 
-    global server 
-    server = Server(args)
+    server = Server()
 
 if __name__ == '__main__':
     main()
