@@ -26,7 +26,7 @@ debug = False
 
 class RosPublisher(Node):
     def __init__(self):
-        super().__init__('robot_control_publisher')
+        super().__init__('portal_app')
         self.rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
         self.rvr_start_roll = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_start_roll', 10)
         self.rvr_stop_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_stop_roll', 10)
@@ -92,7 +92,8 @@ def control_event():
     return 'OK'
 
 class Server():
-    def __init__(self):
+    def __init__(self, args):
+        rclpy.init(args=args)
         self.flask_server = make_server(
             '', 8080,
             app=app)
@@ -100,7 +101,6 @@ class Server():
             target=self.flask_server.serve_forever)
 
         self.ros_publisher = RosPublisher()
-        rclpy.init(args=None)
 
     def cleanup(self):
         print('Shutting down Flask server')
@@ -109,7 +109,7 @@ class Server():
         self.flask_thread.join()
         rclpy.shutdown()
 
-def main():
+def main(args=None):
     def endProcess(signum=None, frame=None):
         # Called on process termination.
         if signum is not None:
@@ -128,7 +128,7 @@ def main():
     signal.signal(signal.SIGQUIT, endProcess)
 
     global server 
-    server = Server()
+    server = Server(args)
 
 if __name__ == '__main__':
     main()
