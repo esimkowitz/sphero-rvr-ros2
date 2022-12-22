@@ -6,28 +6,16 @@
 
 # Does not work, need to clean up bits from old setup, get logic working so that it can send messages over the ROS publisher
 
-
-import argparse
-from flask import Flask, render_template, session, request, Response
-
-import sys
-import io
-import os
-import shutil
-import signal
-import time
-import urllib
-
-from subprocess import Popen, PIPE, check_output
-from string import Template
-from struct import Struct
 from threading import Thread
-from time import sleep, time
+from flask import Flask, render_template, request
+from wsgiref.simple_server import make_server
+
+import os
+import signal
 
 import rclpy
 from rclpy.node import Node
 import std_msgs.msg
-import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -49,61 +37,77 @@ class RosPublisher(Node):
         msg = std_msgs.msg.Float32MultiArray()
         msg.data = data
         self.rvr_change_leds.publish(msg)
-        if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
+        self.log_debug(msg)
 
     def rvr_start_roll(self, data):
         msg = std_msgs.msg.Float32MultiArray()
         msg.data = data
         self.rvr_start_roll.publish(msg)
-        if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
+        self.log_debug(msg)
 
     def rvr_stop_roll(self, data):
         msg = std_msgs.msg.Float32()
         msg.data = data
         self.rvr_stop_roll.publish(msg)
-        if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
+        self.log_debug(msg)
 
     def rvr_set_heading(self, data):
         msg = std_msgs.msg.Float32()
         msg.data = data
         self.rvr_set_heading.publish(msg)
-        if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
+        self.log_debug(msg)
 
     def rvr_reset_heading(self, data):
         msg = std_msgs.msg.Empty()
         msg.data = data
         self.rvr_reset_heading.publish(msg)
+        self.log_debug(msg)
+    
+    def log_debug(self, msg):
         if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
-
-rclpy.init(args=None)
-ros_publisher = RosPublisher()
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/control_event', methods=['POST'])
 def control_event():
     if request.method == 'POST':
         control = request.form['control']
         if control == 'f':
-            ros_publisher.rvr_start_roll([30.0, 0.0])
-            ros_publisher.get_logger().info('robot forward')
+            server.ros_publisher.rvr_start_roll([30.0, 0.0])
+            server.ros_publisher.get_logger().info('robot forward')
         elif control == 'b':
-            ros_publisher.rvr_start_roll([30.0, 180.0])
-            ros_publisher.get_logger().info('robot backward')
+            server.ros_publisher.rvr_start_roll([30.0, 180.0])
+            server.ros_publisher.get_logger().info('robot backward')
         elif control == 'l':
-            ros_publisher.rvr_start_roll([30.0, 270.0])
-            ros_publisher.get_logger().info('robot left')
+            server.ros_publisher.rvr_start_roll([30.0, 270.0])
+            server.ros_publisher.get_logger().info('robot left')
         elif control == 'r':
-            ros_publisher.rvr_start_roll([30.0, 90.0])
-            ros_publisher.get_logger().info('robot right')
+            server.ros_publisher.rvr_start_roll([30.0, 90.0])
+            server.ros_publisher.get_logger().info('robot right')
         elif control == 's':
-            ros_publisher.rvr_stop_roll(0.0)
-            ros_publisher.get_logger().info('robot stop')
+            server.ros_publisher.rvr_stop_roll(0.0)
+            server.ros_publisher.get_logger().info('robot stop')
     return 'OK'
 
+class Server():
+    def __init__(self):
+        self.flask_server = make_server(
+            '', 8080,
+            app=app)
+        self.flask_thread = Thread(
+            target=self.flask_server.serve_forever)
+
+        self.ros_publisher = RosPublisher()
+        rclpy.init(args=None)
+
+    def cleanup(self):
+        print('Shutting down Flask server')
+        self.flask_server.shutdown()
+        print('Waiting for Flask thread to finish')
+        self.flask_thread.join()
+        rclpy.shutdown()
 
 def main():
     def endProcess(signum=None, frame=None):
@@ -114,7 +118,7 @@ def main():
             print("signal {} received by process with PID {}".format(
                 SIGNAL_NAMES_DICT[signum], os.getpid()))
         print("\n-- Terminating program --")
-        rclpy.shutdown()
+        server.cleanup()
         os._exit(0)
 
     # Assign handler for process exit
@@ -122,6 +126,9 @@ def main():
     signal.signal(signal.SIGINT, endProcess)
     signal.signal(signal.SIGHUP, endProcess)
     signal.signal(signal.SIGQUIT, endProcess)
+
+    global server 
+    server = Server()
 
 if __name__ == '__main__':
     main()

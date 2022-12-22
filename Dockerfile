@@ -18,4 +18,5 @@ RUN cd ros2_ws && \
     colcon build
 
 RUN rm /ros_entrypoint.sh && echo "source /app/ros_entrypoint.sh" >> ~/.bashrc
+EXPOSE 8080
 ENTRYPOINT [ "/app/ros_entrypoint.sh" ]
