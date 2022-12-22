@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'robotcontrol'
+package_name = 'robot_control'
 
 setup(
     name=package_name,
@@ -28,7 +28,7 @@ setup(
           'Topic :: System :: Hardware'],
     entry_points={
         'console_scripts': [
-            'portal_app = robotcontrol.portal_app:main'
+            'portal_app = robot_control.portal_app:main'
         ],
     },
 )

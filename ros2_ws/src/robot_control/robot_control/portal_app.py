@@ -38,7 +38,7 @@ debug = False
 
 class RosPublisher(Node):
     def __init__(self):
-        super().__init__('robotcontrol_publisher')
+        super().__init__('robot_control_publisher')
         self.rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
         self.rvr_start_roll = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_start_roll', 10)
         self.rvr_stop_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_stop_roll', 10)
@@ -75,6 +75,9 @@ class RosPublisher(Node):
         self.rvr_reset_heading.publish(msg)
         if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
 
+rclpy.init(args=None)
+ros_publisher = RosPublisher()
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -85,50 +88,20 @@ def control_event():
     if request.method == 'POST':
         control = request.form['control']
         if control == 'f':
-            try:
-                robot.forward(75)
-            except:
-                if is_robot:
-                    raise RuntimeError("Unknown error with robot")
-                else:
-                    pass
-            print("robot forward")
+            ros_publisher.rvr_start_roll([30.0, 0.0])
+            ros_publisher.get_logger().info('robot forward')
         elif control == 'b':
-            try:
-                robot.backward(75)
-            except:
-                if is_robot:
-                    raise RuntimeError("Unknown error with robot")
-                else:
-                    pass
-            print("robot backward")
+            ros_publisher.rvr_start_roll([30.0, 180.0])
+            ros_publisher.get_logger().info('robot backward')
         elif control == 'l':
-            try:
-                robot.left(75)
-            except:
-                if is_robot:
-                    raise RuntimeError("Unknown error with robot")
-                else:
-                    pass
-            print("robot left")
+            ros_publisher.rvr_start_roll([30.0, 270.0])
+            ros_publisher.get_logger().info('robot left')
         elif control == 'r':
-            try:
-                robot.right(75)
-            except:
-                if is_robot:
-                    raise RuntimeError("Unknown error with robot")
-                else:
-                    pass
-            print("robot right")
+            ros_publisher.rvr_start_roll([30.0, 90.0])
+            ros_publisher.get_logger().info('robot right')
         elif control == 's':
-            try:
-                robot.stop()
-            except:
-                if is_robot:
-                    raise RuntimeError("Unknown error with robot")
-                else:
-                    pass
-            print("robot stop")
+            ros_publisher.rvr_stop_roll(0.0)
+            ros_publisher.get_logger().info('robot stop')
     return 'OK'
 
 
@@ -141,6 +114,7 @@ def main():
             print("signal {} received by process with PID {}".format(
                 SIGNAL_NAMES_DICT[signum], os.getpid()))
         print("\n-- Terminating program --")
+        rclpy.shutdown()
         os._exit(0)
 
     # Assign handler for process exit
@@ -148,9 +122,6 @@ def main():
     signal.signal(signal.SIGINT, endProcess)
     signal.signal(signal.SIGHUP, endProcess)
     signal.signal(signal.SIGQUIT, endProcess)
-
-    server.start()
-
 
 if __name__ == '__main__':
     main()

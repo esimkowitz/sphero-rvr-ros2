@@ -7,6 +7,8 @@ services:
             dockerfile: Dockerfile
         image: esimkowitz/sphero-rvr-ros2:latest
         privileged: true
-        command: ros2 launch rvr_bringup server.launch.py
+        ports:
+          - 8080:80
+        command: ros2 launch rvr_bringup portal_and_server.launch.py
         volumes:
           - /dev/ttyS0:/dev/ttyS0
