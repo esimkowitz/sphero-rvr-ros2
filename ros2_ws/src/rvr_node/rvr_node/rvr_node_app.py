@@ -50,7 +50,7 @@ class RvrNode(Node):
             'rvr_stop_roll',
             self.stop_roll,
             10)
-        self.roll_forward_sub = self.self.create_subscription(
+        self.roll_straight_sub = self.create_subscription(
             std_msgs.msg.Float32,
             'rvr_roll_straight',
             self.roll_straight,
