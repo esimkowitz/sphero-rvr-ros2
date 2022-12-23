@@ -17,7 +17,7 @@ import rclpy
 from rclpy.node import Node
 import std_msgs.msg
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='/app/ros2_ws/src/robot_control/robot_control/templates', static_folder='/app/ros2_ws/src/robot_control/robot_control/static')
 app.config['SECRET_KEY'] = 'secret!'
 app.debug = False
 app.threading = True
@@ -27,40 +27,40 @@ debug = False
 class RosPublisher(Node):
     def __init__(self):
         super().__init__('portal_app')
-        self.rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
-        self.rvr_start_roll = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_start_roll', 10)
-        self.rvr_stop_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_stop_roll', 10)
-        self.rvr_set_heading = self.create_publisher(std_msgs.msg.Float32, 'rvr_set_heading', 10)
-        self.rvr_reset_heading = self.create_publisher(std_msgs.msg.Empty, 'rvr_reset_heading', 10)
+        self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
+        self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_start_roll', 10)
+        self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_stop_roll', 10)
+        self.publish_rvr_set_heading = self.create_publisher(std_msgs.msg.Float32, 'rvr_set_heading', 10)
+        self.publish_rvr_reset_heading = self.create_publisher(std_msgs.msg.Empty, 'rvr_reset_heading', 10)
 
     def rvr_change_leds(self, data):
         msg = std_msgs.msg.Float32MultiArray()
         msg.data = data
-        self.rvr_change_leds.publish(msg)
+        self.publish_rvr_change_leds.publish(msg)
         self.log_debug(msg)
 
     def rvr_start_roll(self, data):
         msg = std_msgs.msg.Float32MultiArray()
         msg.data = data
-        self.rvr_start_roll.publish(msg)
+        self.publish_rvr_start_roll.publish(msg)
         self.log_debug(msg)
 
     def rvr_stop_roll(self, data):
         msg = std_msgs.msg.Float32()
         msg.data = data
-        self.rvr_stop_roll.publish(msg)
+        self.publish_rvr_stop_roll.publish(msg)
         self.log_debug(msg)
 
     def rvr_set_heading(self, data):
         msg = std_msgs.msg.Float32()
         msg.data = data
-        self.rvr_set_heading.publish(msg)
+        self.publish_rvr_set_heading.publish(msg)
         self.log_debug(msg)
 
     def rvr_reset_heading(self, data):
         msg = std_msgs.msg.Empty()
         msg.data = data
-        self.rvr_reset_heading.publish(msg)
+        self.publish_rvr_reset_heading.publish(msg)
         self.log_debug(msg)
     
     def log_debug(self, msg):
@@ -101,11 +101,14 @@ class Server():
             app=app)
         self.flask_thread = Thread(
             target=self.flask_server.serve_forever)
+        ros_publisher.get_logger().info('flask server initialized')
+        self.flask_thread.start()
+        ros_publisher.get_logger().info('flask server started')
 
     def cleanup(self):
-        print('Shutting down Flask server')
+        ros_publisher.get_logger().info('Shutting down Flask server')
         self.flask_server.shutdown()
-        print('Waiting for Flask thread to finish')
+        ros_publisher.get_logger().info('Waiting for Flask thread to finish')
         self.flask_thread.join()
         rclpy.shutdown()
 
