@@ -60,6 +60,15 @@ class RosPublisher(Node):
         self.publish_rvr_set_heading.publish(msg)
         self.log_debug(msg)
 
+    def rvr_turn_left(self):
+        self.rvr_set_heading(self.heading - 30.0)
+
+    def rvr_turn_right(self):
+        self.rvr_set_heading(self.heading + 30.0)
+
+    def rvr_backwards(self):
+        self.rvr_set_heading(self.heading + 180.0)
+
     def rvr_reset_heading(self):
         msg = std_msgs.msg.Empty()
         self.heading = 0.0
@@ -85,15 +94,15 @@ def control_event():
             ros_publisher.rvr_start_roll()
             ros_publisher.get_logger().info('robot forward')
         elif control == 'b':
-            ros_publisher.rvr_set_heading(180.0)
+            ros_publisher.rvr_backwards()
             ros_publisher.rvr_start_roll()
             ros_publisher.get_logger().info('robot backward')
         elif control == 'l':
-            ros_publisher.rvr_set_heading(270.0)
+            ros_publisher.rvr_turn_left()
             ros_publisher.rvr_start_roll()
             ros_publisher.get_logger().info('robot left')
         elif control == 'r':
-            ros_publisher.rvr_set_heading(90.0)
+            ros_publisher.rvr_turn_right()
             ros_publisher.rvr_start_roll()
             ros_publisher.get_logger().info('robot right')
         elif control == 's':
