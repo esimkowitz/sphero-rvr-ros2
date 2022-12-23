@@ -41,9 +41,15 @@ class RosPublisher(Node):
         self.publish_rvr_change_leds.publish(msg)
         self.log_debug(msg)
 
-    def rvr_start_roll(self):
+    def rvr_start_roll_forward(self):
         msg = std_msgs.msg.Float32MultiArray()
         msg.data = [30.0, self.heading % 360.0]
+        self.publish_rvr_start_roll.publish(msg)
+        self.log_debug(msg)
+
+    def rvr_start_roll_reverse(self):
+        msg = std_msgs.msg.Float32MultiArray()
+        msg.data = [-30.0, self.heading % 360.0]
         self.publish_rvr_start_roll.publish(msg)
         self.log_debug(msg)
 
@@ -65,9 +71,6 @@ class RosPublisher(Node):
 
     def rvr_turn_right(self):
         self.rvr_set_heading(self.heading + 30.0)
-
-    def rvr_backwards(self):
-        self.rvr_set_heading(self.heading + 180.0)
 
     def rvr_reset_heading(self):
         msg = std_msgs.msg.Empty()
@@ -91,11 +94,10 @@ def control_event():
     if request.method == 'POST':
         control = request.form['control']
         if control == 'f':
-            ros_publisher.rvr_start_roll()
+            ros_publisher.rvr_start_roll_forward()
             ros_publisher.get_logger().info('robot forward')
         elif control == 'b':
-            ros_publisher.rvr_backwards()
-            ros_publisher.rvr_start_roll()
+            ros_publisher.rvr_start_roll_reverse()
             ros_publisher.get_logger().info('robot backward')
         elif control == 'l':
             ros_publisher.rvr_turn_left()
