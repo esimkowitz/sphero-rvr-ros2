@@ -9,7 +9,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>rvr_server</exec_depend>
+  <exec_depend>rvr_node</exec_depend>
   <exec_depend>robot_control</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

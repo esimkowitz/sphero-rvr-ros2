@@ -34,9 +34,9 @@ encoder_global = {}
 
 received = 0x00     # received byte - fully received at 0x1f
 
-class SpheroNode(Node):
+class RvrNode(Node):
     def __init__(self, rvr :SpheroRvrAsync, loop :asyncio.AbstractEventLoop) -> None:
-        super().__init__('sphero_node')
+        super().__init__('rvr_node')
         self.rvr = rvr
         self.loop = loop
         self.publisher_ = self.create_publisher(
@@ -150,9 +150,9 @@ def main(args=None):
     loop.run_until_complete(asyncio.sleep(2))
     loop.run_until_complete(rvr.drive_control.reset_heading())
 
-    sphero_node = SpheroNode(rvr, loop)
+    rvr_node = RvrNode(rvr, loop)
 
-    rclpy.spin(sphero_node)
+    rclpy.spin(rvr_node)
 
     rvr.sensor_control.clear(),
     rvr.close()

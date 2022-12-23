@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'rvr_server'
+package_name = 'rvr_node'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'sphero_node = rvr_server.sphero_node:main'
+            'rvr_node = rvr_node.rvr_node_app:main'
         ],
     },
 )

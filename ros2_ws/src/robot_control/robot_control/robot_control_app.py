@@ -24,11 +24,11 @@ app.threading = True
 
 debug = False
 
-class RosPublisher(Node):
+class RobotControlPublisher(Node):
     heading = 0.0
 
     def __init__(self):
-        super().__init__('portal_app')
+        super().__init__('robot_control_node')
         self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
         self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_start_roll', 10)
         self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_stop_roll', 10)
@@ -83,7 +83,7 @@ class RosPublisher(Node):
         if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
 
 rclpy.init(args=None)
-ros_publisher = RosPublisher()
+publisher = RobotControlPublisher()
 
 @app.route('/')
 def index():
@@ -93,23 +93,26 @@ def index():
 def control_event():
     if request.method == 'POST':
         control = request.form['control']
-        if control == 'f':
-            ros_publisher.rvr_start_roll_forward()
-            ros_publisher.get_logger().info('robot forward')
-        elif control == 'b':
-            ros_publisher.rvr_start_roll_reverse()
-            ros_publisher.get_logger().info('robot backward')
-        elif control == 'l':
-            ros_publisher.rvr_turn_left()
-            ros_publisher.rvr_start_roll()
-            ros_publisher.get_logger().info('robot left')
-        elif control == 'r':
-            ros_publisher.rvr_turn_right()
-            ros_publisher.rvr_start_roll()
-            ros_publisher.get_logger().info('robot right')
-        elif control == 's':
-            ros_publisher.rvr_stop_roll()
-            ros_publisher.get_logger().info('robot stop')
+
+        match control:
+            case 'f': 
+                publisher.rvr_start_roll_forward()
+                publisher.get_logger().info('robot forward')
+            case 'b':
+                publisher.rvr_start_roll_reverse()
+                publisher.get_logger().info('robot backward')
+            case 'l':
+                publisher.rvr_turn_left()
+                publisher.get_logger().info('robot left')
+            case 'r':
+                publisher.rvr_turn_right()
+                publisher.get_logger().info('robot right')
+            case 's':
+                publisher.rvr_stop_roll()
+                publisher.get_logger().info('robot stop')
+            case _:
+                publisher.get_logger().warn('unknown command to control_event')
+
     return 'OK'
 
 class Server():
@@ -119,14 +122,14 @@ class Server():
             app=app)
         self.flask_thread = Thread(
             target=self.flask_server.serve_forever)
-        ros_publisher.get_logger().info('flask server initialized')
+        publisher.get_logger().info('flask server initialized')
         self.flask_thread.start()
-        ros_publisher.get_logger().info('flask server started')
+        publisher.get_logger().info('flask server started')
 
     def cleanup(self):
-        ros_publisher.get_logger().info('Shutting down Flask server')
+        publisher.get_logger().info('Shutting down Flask server')
         self.flask_server.shutdown()
-        ros_publisher.get_logger().info('Waiting for Flask thread to finish')
+        publisher.get_logger().info('Waiting for Flask thread to finish')
         self.flask_thread.join()
         rclpy.shutdown()
 
