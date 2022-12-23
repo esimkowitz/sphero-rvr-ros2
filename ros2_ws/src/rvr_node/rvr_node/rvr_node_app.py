@@ -29,6 +29,7 @@ class RvrNode(Node):
 
     def __init__(self, rvr :SpheroRvrAsync, loop :asyncio.AbstractEventLoop) -> None:
         super().__init__('rvr_node')
+        self.get_logger().info('RvrNode init started')
         self.rvr = rvr
         self.loop = loop
         self.publisher_ = self.create_publisher(
@@ -71,8 +72,7 @@ class RvrNode(Node):
             self.reset_heading,
             10)
         
-        # Reset the robot's heading to 0.0
-        self.reset_heading()
+        self.get_logger().info('RvrNode init finished')
 
     def start_roll(self, msg):
         stopwatch = Stopwatch(3)
@@ -181,9 +181,15 @@ def main(args=None):
 
     # Give RVR time to wake up
     loop.run_until_complete(asyncio.sleep(2))
-    loop.run_until_complete(rvr.drive_control.reset_heading())
 
     rvr_node = RvrNode(rvr, loop)
+
+    rvr_node.get_logger().info('RvrNode initialized')
+        
+    # Reset the robot's heading to 0.0
+    rvr_node.reset_heading()
+
+    rvr_node.get_logger().info('Rvr heading reset')
 
     rclpy.spin(rvr_node)
 

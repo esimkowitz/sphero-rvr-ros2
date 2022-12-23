@@ -16,7 +16,7 @@ app.config['SECRET_KEY'] = 'secret!'
 app.debug = False
 app.threading = True
 
-debug = False
+debug = True
 
 class RobotControlPublisher(Node):
     def __init__(self):
@@ -32,36 +32,30 @@ class RobotControlPublisher(Node):
         msg = std_msgs.msg.Float32MultiArray()
         msg.data = data
         self.publish_rvr_change_leds.publish(msg)
-        self.log_debug(msg)
 
     def rvr_start_roll_forward(self):
         msg = std_msgs.msg.Float32()
         msg.data = 30.0
         self.publish_rvr_roll_straight.publish(msg)
-        self.log_debug(msg)
 
     def rvr_start_roll_reverse(self):
         msg = std_msgs.msg.Float32()
         msg.data = -30.0
         self.publish_rvr_roll_straight.publish(msg)
-        self.log_debug(msg)
 
     def rvr_stop_roll(self):
         msg = std_msgs.msg.Empty()
         self.publish_rvr_stop_roll.publish(msg)
-        self.log_debug(msg)
 
     def rvr_adjust_heading(self, heading_delta):
         msg = std_msgs.msg.Float32()
         msg.data = heading_delta
         self.publish_rvr_adjust_heading.publish(msg)
-        self.log_debug(msg)
 
     def rvr_set_heading(self, heading):
         msg = std_msgs.msg.Float32()
         msg.data = heading % 360.0
         self.publish_rvr_set_heading.publish(msg)
-        self.log_debug(msg)
 
     def rvr_turn_left(self):
         self.rvr_adjust_heading(-30.0)
@@ -72,10 +66,6 @@ class RobotControlPublisher(Node):
     def rvr_reset_heading(self):
         msg = std_msgs.msg.Empty()
         self.publish_rvr_reset_heading.publish(msg)
-        self.log_debug(msg)
-    
-    def log_debug(self, msg):
-        if debug: self.get_logger().info('Publishing: "%s"' % msg.data)
 
 rclpy.init(args=None)
 publisher = RobotControlPublisher()
