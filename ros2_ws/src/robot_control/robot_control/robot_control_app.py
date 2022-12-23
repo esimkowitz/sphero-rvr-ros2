@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 
-# Robot controller, modified from the example provided in the Flask-SocketIO
-# GitHub repo.
-# Modified by Evan Simkowitz (esimkowitz@wustl.edu), July 2017
-
-# Does not work, need to clean up bits from old setup, get logic working so that it can send messages over the ROS publisher
-
 from threading import Thread
 from flask import Flask, render_template, request
 from wsgiref.simple_server import make_server

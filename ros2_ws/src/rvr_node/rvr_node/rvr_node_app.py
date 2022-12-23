@@ -1,11 +1,3 @@
-""" 
-This project is owned by Altium, and is licensed under a Creative Commons Attribution 4.0 International License.
-- Software can be modified, used commercially, and distributed.
-- Software can be modified and used in private.
-- A license and copyright notice must be included in the software.
-- Software authors provide no warranty with the software and are not liable for anything.
-For any question/concerns regarding the work please contact Harnoor Singh at harnoor343@gmail.com
-"""
 import os
 import sys
 import time
@@ -19,7 +11,6 @@ from sphero_sdk import SerialAsyncDal
 import rclpy
 from rclpy.node import Node
 import std_msgs.msg
-import json
 
 debug = False
 delay = 250
