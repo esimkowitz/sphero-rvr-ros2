@@ -87,7 +87,7 @@ class RvrNode(Node):
     def stop_roll(self, msg=None):
         stopwatch = Stopwatch(3)
         stopwatch.start()
-        self.get_logger().info('stop_roll: "%s"' % msg.data)
+        self.get_logger().info('stop_roll')
         self.loop.run_until_complete(
             self.rvr.drive_control.roll_stop(
                 heading=self.heading
