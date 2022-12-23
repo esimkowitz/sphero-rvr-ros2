@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <title>Robot Controls</title>
+    <meta charset="utf-8">
+    <meta name="description" content="A controller for a Python-based Raspberry Pi robot.">
+    <meta name="author" content="Evan Simkowitz">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/nipplejs.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/joystick.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <script type="text/javascript" charset="utf-8">
+        function sendData(data) {
+            var XHR = new XMLHttpRequest();
+            var urlEncodedData = "";
+            var urlEncodedDataPairs = [];
+            var name;
+
+            // Turn the data object into an array of URL-encoded key/value pairs.
+            for (name in data) {
+                urlEncodedDataPairs.push(encodeURIComponent(name) + '=' + encodeURIComponent(data[name]));
+            }
+
+            // Combine the pairs into a single string and replace all %-encoded spaces to 
+            // the '+' character; matches the behaviour of browser form submissions.
+            urlEncodedData = urlEncodedDataPairs.join('&').replace(/%20/g, '+');
+
+            // Define what happens on successful data submission
+            XHR.addEventListener('load', function (event) {
+                console.log('Successful response for ' + data);
+            });
+
+            // Define what happens in case of error
+            XHR.addEventListener('error', function (event) {
+                console.log('Unsuccessful response for ' + data);
+            });
+            
+            // Set up our request
+            var url = location.protocol + '//' + document.domain + ':' + location.port + '/control_event';
+
+            XHR.open('POST', url);
+
+            // Add the required HTTP header for form data POST requests
+            XHR.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            // Finally, send our data.
+            XHR.send(urlEncodedData);
+        }
+
+        function control(message) {
+            sendData({
+                'control': message
+            });
+            console.log("Control \'" + message + "\' sent to robot");
+        }
+
+        function forward() {
+            control("f");
+        }
+
+        function left() {
+            control("l");
+        }
+
+        function right() {
+            control("r");
+        }
+
+        function backward() {
+            control("b");
+        }
+
+        function stop() {
+            control("s");
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (event.which === 87 || event.which === 38) {
+                forward();
+            } else if (event.which === 68 || event.which === 39) {
+                right();
+            } else if (event.which === 83 || event.which === 40) {
+                backward();
+            } else if (event.which === 65 || event.which === 37) {
+                left();
+            }
+        });
+
+        document.addEventListener("keyup", function (event) {
+            if (event.which === 87 || event.which === 38 ||
+                event.which === 68 || event.which === 39 ||
+                event.which === 83 || event.which === 40 ||
+                event.which === 65 || event.which === 37) {
+                stop();
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <h1>Robot Controls</h1>
+    <div id="control_area">
+        <div class="zone joystick active" id="joystick"></div>
+    </div>
+</body>
+<script type="text/javascript" charset="utf-8">
+    var manager = nipplejs.create({
+        zone: document.getElementById('joystick'),
+        mode: 'dynamic',
+        color: 'blue'
+    });
+
+    manager.on("dir:up", function (event) {
+        forward();
+    });
+    manager.on("dir:down", function (event) {
+        backward();
+    });
+    manager.on("dir:left", function (event) {
+        left();
+    });
+    manager.on("dir:right", function (event) {
+        right();
+    });
+    manager.on("end", function (event) {
+        stop();
+    });
+</script>
+
+</html>
