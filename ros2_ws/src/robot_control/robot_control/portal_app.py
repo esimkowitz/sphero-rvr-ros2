@@ -25,6 +25,8 @@ app.threading = True
 debug = False
 
 class RosPublisher(Node):
+    heading = 0.0
+
     def __init__(self):
         super().__init__('portal_app')
         self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
@@ -39,27 +41,29 @@ class RosPublisher(Node):
         self.publish_rvr_change_leds.publish(msg)
         self.log_debug(msg)
 
-    def rvr_start_roll(self, data):
+    def rvr_start_roll(self):
         msg = std_msgs.msg.Float32MultiArray()
-        msg.data = data
+        msg.data = [30.0, self.heading % 360.0]
         self.publish_rvr_start_roll.publish(msg)
         self.log_debug(msg)
 
-    def rvr_stop_roll(self, data):
+    def rvr_stop_roll(self):
         msg = std_msgs.msg.Float32()
-        msg.data = data
+        msg.data = self.heading % 360.0
         self.publish_rvr_stop_roll.publish(msg)
         self.log_debug(msg)
 
-    def rvr_set_heading(self, data):
+    def rvr_set_heading(self, heading):
         msg = std_msgs.msg.Float32()
-        msg.data = data
+        self.heading = heading % 360.0
+        msg.data = self.heading
         self.publish_rvr_set_heading.publish(msg)
         self.log_debug(msg)
 
-    def rvr_reset_heading(self, data):
+    def rvr_reset_heading(self):
         msg = std_msgs.msg.Empty()
-        msg.data = data
+        self.heading = 0.0
+        msg.data = self.heading
         self.publish_rvr_reset_heading.publish(msg)
         self.log_debug(msg)
     
@@ -78,19 +82,22 @@ def control_event():
     if request.method == 'POST':
         control = request.form['control']
         if control == 'f':
-            ros_publisher.rvr_start_roll([30.0, 0.0])
+            ros_publisher.rvr_start_roll()
             ros_publisher.get_logger().info('robot forward')
         elif control == 'b':
-            ros_publisher.rvr_start_roll([30.0, 180.0])
+            ros_publisher.rvr_set_heading(180.0)
+            ros_publisher.rvr_start_roll()
             ros_publisher.get_logger().info('robot backward')
         elif control == 'l':
-            ros_publisher.rvr_start_roll([30.0, 270.0])
+            ros_publisher.rvr_set_heading(270.0)
+            ros_publisher.rvr_start_roll()
             ros_publisher.get_logger().info('robot left')
         elif control == 'r':
-            ros_publisher.rvr_start_roll([30.0, 90.0])
+            ros_publisher.rvr_set_heading(90.0)
+            ros_publisher.rvr_start_roll()
             ros_publisher.get_logger().info('robot right')
         elif control == 's':
-            ros_publisher.rvr_stop_roll(0.0)
+            ros_publisher.rvr_stop_roll()
             ros_publisher.get_logger().info('robot stop')
     return 'OK'
 
