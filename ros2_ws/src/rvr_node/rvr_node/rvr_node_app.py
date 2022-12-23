@@ -26,6 +26,7 @@ encoder_global = {}
 received = 0x00     # received byte - fully received at 0x1f
 
 class RvrNode(Node):
+
     def __init__(self, rvr :SpheroRvrAsync, loop :asyncio.AbstractEventLoop) -> None:
         super().__init__('rvr_node')
         self.rvr = rvr
@@ -45,20 +46,33 @@ class RvrNode(Node):
             self.start_roll,
             10)
         self.stop_roll_sub = self.create_subscription(
-            std_msgs.msg.Float32,
+            std_msgs.msg.Empty,
             'rvr_stop_roll',
             self.stop_roll,
+            10)
+        self.roll_forward_sub = self.self.create_subscription(
+            std_msgs.msg.Float32,
+            'rvr_roll_straight',
+            self.roll_straight,
             10)
         self.set_heading_sub = self.create_subscription(
             std_msgs.msg.Float32,
             'rvr_set_heading',
             self.set_heading,
             10)
-        self.reset_heading = self.create_subscription(
+        self.adjust_heading_sub = self.create_subscription(
+            std_msgs.msg.Float32,
+            'rvr_adjust_heading',
+            self.adjust_heading,
+            10)
+        self.reset_heading_sub = self.create_subscription(
             std_msgs.msg.Empty,
             'rvr_reset_heading',
             self.reset_heading,
             10)
+        
+        # Reset the robot's heading to 0.0
+        self.reset_heading()
 
     def start_roll(self, msg):
         stopwatch = Stopwatch(3)
@@ -66,42 +80,70 @@ class RvrNode(Node):
         self.get_logger().info('start_roll: "%s"' % msg.data)
         speed = int(msg.data[0])
         heading = int(msg.data[1])
-        self.loop.run_until_complete(
-            self.rvr.drive_control.roll_start(
-                speed=speed,
-                heading=heading
-            )
-        )
+        self.set_heading_local(heading)
+        self.roll_start_helper(speed)
         self.get_logger().info('start_roll end %5.4f' % stopwatch.duration)
 
-    def stop_roll(self, msg):
+    def stop_roll(self, msg=None):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('stop_roll: "%s"' % msg.data)
-        heading = int(msg.data)
         self.loop.run_until_complete(
             self.rvr.drive_control.roll_stop(
-                heading=heading
+                heading=self.heading
             )
         )
         self.get_logger().info('stop_roll end %5.4f' % stopwatch.duration)
+
+    def roll_straight(self, msg):
+        stopwatch = Stopwatch(3)
+        stopwatch.start()
+        self.get_logger().info('roll_straight: "%s"' % msg.data)
+        speed = int(msg.data[0])
+        self.roll_start_helper(speed)
+        self.get_logger().info('roll_straight end %5.4f' % stopwatch.duration)
+
+    def roll_start_helper(self, speed):
+        self.loop.run_until_complete(
+            self.rvr.drive_control.roll_start(
+                speed=speed,
+                heading=self.heading
+            )
+        )
+
+    def set_heading_local(self, heading):
+        self.heading = float(heading) % 360.0
+    
+    def set_heading_helper(self):
+        self.loop.run_until_complete(
+            self.rvr.drive_control.set_heading(
+                heading=self.heading
+            )
+        )
+
+    def adjust_heading(self, msg):
+        stopwatch = Stopwatch(3)
+        stopwatch.start()
+        self.get_logger().info('adjust_heading: "%s"' % msg.data)
+        heading_delta = int(msg.data)
+        self.set_heading_local(self.heading + float(heading_delta))
+        self.set_heading_helper()
+        self.get_logger().info('adjust_heading end %5.4f' % stopwatch.duration)
 
     def set_heading(self, msg):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('set_heading: "%s"' % msg.data)
         heading = int(msg.data)
-        self.loop.run_until_complete(
-            self.rvr.drive_control.set_heading(
-                heading=heading
-            )
-        )
+        self.set_heading_local(heading)
+        self.set_heading_helper()
         self.get_logger().info('set_heading end %5.4f' % stopwatch.duration)
     
-    def reset_heading(self, msg):
+    def reset_heading(self, msg=None):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('reset_heading')
+        self.set_heading_local(0.0)
         self.loop.run_until_complete(
             self.rvr.drive_control.reset_heading()
         )

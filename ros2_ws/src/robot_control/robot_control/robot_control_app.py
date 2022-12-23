@@ -19,13 +19,12 @@ app.threading = True
 debug = False
 
 class RobotControlPublisher(Node):
-    heading = 0.0
-
     def __init__(self):
         super().__init__('robot_control_node')
         self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
-        self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_start_roll', 10)
-        self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_stop_roll', 10)
+        self.publish_rvr_roll_straight = self.create_publisher(std_msgs.msg.Float32, 'rvr_roll_straight', 10)
+        self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10)
+        self.publish_rvr_adjust_heading = self.create_publisher(std_msgs.msg.Float32, 'rvr_adjust_heading', 10)
         self.publish_rvr_set_heading = self.create_publisher(std_msgs.msg.Float32, 'rvr_set_heading', 10)
         self.publish_rvr_reset_heading = self.create_publisher(std_msgs.msg.Empty, 'rvr_reset_heading', 10)
 
@@ -36,40 +35,42 @@ class RobotControlPublisher(Node):
         self.log_debug(msg)
 
     def rvr_start_roll_forward(self):
-        msg = std_msgs.msg.Float32MultiArray()
-        msg.data = [30.0, self.heading % 360.0]
-        self.publish_rvr_start_roll.publish(msg)
+        msg = std_msgs.msg.Float32()
+        msg.data = 30.0
+        self.publish_rvr_roll_straight.publish(msg)
         self.log_debug(msg)
 
     def rvr_start_roll_reverse(self):
-        msg = std_msgs.msg.Float32MultiArray()
-        msg.data = [-30.0, self.heading % 360.0]
-        self.publish_rvr_start_roll.publish(msg)
+        msg = std_msgs.msg.Float32()
+        msg.data = -30.0
+        self.publish_rvr_roll_straight.publish(msg)
         self.log_debug(msg)
 
     def rvr_stop_roll(self):
-        msg = std_msgs.msg.Float32()
-        msg.data = self.heading % 360.0
+        msg = std_msgs.msg.Empty()
         self.publish_rvr_stop_roll.publish(msg)
+        self.log_debug(msg)
+
+    def rvr_adjust_heading(self, heading_delta):
+        msg = std_msgs.msg.Float32()
+        msg.data = heading_delta
+        self.publish_rvr_adjust_heading.publish(msg)
         self.log_debug(msg)
 
     def rvr_set_heading(self, heading):
         msg = std_msgs.msg.Float32()
-        self.heading = heading % 360.0
-        msg.data = self.heading
+        msg.data = heading % 360.0
         self.publish_rvr_set_heading.publish(msg)
         self.log_debug(msg)
 
     def rvr_turn_left(self):
-        self.rvr_set_heading(self.heading - 30.0)
+        self.rvr_adjust_heading(-30.0)
 
     def rvr_turn_right(self):
-        self.rvr_set_heading(self.heading + 30.0)
+        self.rvr_adjust_heading(30.0)
 
     def rvr_reset_heading(self):
         msg = std_msgs.msg.Empty()
-        self.heading = 0.0
-        msg.data = self.heading
         self.publish_rvr_reset_heading.publish(msg)
         self.log_debug(msg)
     
