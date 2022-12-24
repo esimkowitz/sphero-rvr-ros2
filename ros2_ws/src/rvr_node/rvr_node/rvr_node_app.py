@@ -99,9 +99,9 @@ class RvrNode(Node):
             await asyncio.sleep(1)
     
     def awaken_robot(self):
-        self.loop.run_until_complete(self.rvr.wake())
+        self.sdk_loop.run_until_complete(self.rvr.wake())
         # Give RVR time to wake up
-        self.loop.run_until_complete(asyncio.sleep(2))
+        self.sdk_loop.run_until_complete(asyncio.sleep(2))
         self.rvr_state = RvrState.Stop
 
     def start_roll(self, msg):
@@ -118,7 +118,7 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('stop_roll')
-        self.loop.run_until_complete(
+        self.sdk_loop.run_until_complete(
             self.rvr.drive_control.roll_stop(
                 heading=self.heading
             )
@@ -134,7 +134,7 @@ class RvrNode(Node):
         self.get_logger().info('roll_straight end %5.4f' % stopwatch.duration)
 
     def roll_start_helper(self, speed):
-        self.loop.run_until_complete(
+        self.sdk_loop.run_until_complete(
             self.rvr.drive_control.roll_start(
                 speed=speed,
                 heading=self.heading
@@ -145,7 +145,7 @@ class RvrNode(Node):
         self.heading = int(heading) % 360
     
     def set_heading_helper(self):
-        self.loop.run_until_complete(
+        self.sdk_loop.run_until_complete(
             self.rvr.drive_control.set_heading(
                 heading=self.heading
             )
@@ -174,7 +174,7 @@ class RvrNode(Node):
         stopwatch.start()
         self.get_logger().info('reset_heading')
         self.set_heading_local(0.0)
-        self.loop.run_until_complete(
+        self.sdk_loop.run_until_complete(
             self.rvr.drive_control.reset_heading()
         )
         self.get_logger().info('reset_heading end %5.4f' % stopwatch.duration)
@@ -187,7 +187,7 @@ class RvrNode(Node):
         R = int(led_data[0])
         G = int(led_data[1])
         B = int(led_data[2])
-        self.loop.run_until_complete(
+        self.sdk_loop.run_until_complete(
             self.rvr.set_all_leds(
                 led_group=RvrLedGroups.all_lights.value,
                 led_brightness_values=[color for x in range(10) for color in [R, G, B]]
