@@ -92,8 +92,9 @@ class RvrNode(Node):
         asyncio.create_task(self.exec_loop())
     
     async def exec_loop(self):
+        stopwatch = Stopwatch(3)
         while True:
-            self.get_logger().info('ping')
+            self.get_logger().info('ping %5.4f' % stopwatch.duration)
             await asyncio.sleep(1)
     
     def awaken_robot(self):
