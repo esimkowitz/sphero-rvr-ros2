@@ -38,10 +38,12 @@ class RvrNode(Node):
     def __init__(self) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
-        self.loop = asyncio.get_event_loop()
+        self.sdk_loop = asyncio.get_event_loop()
+        self.logic_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.logic_loop)
         self.rvr = SpheroRvrAsync(
             dal=SerialAsyncDal(
-                self.loop
+                self.sdk_loop
             )
         )
 
