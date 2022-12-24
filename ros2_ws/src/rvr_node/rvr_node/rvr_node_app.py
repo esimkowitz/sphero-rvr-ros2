@@ -106,7 +106,7 @@ class RvrNode(Node):
             else:
                 await self.rvr.set_all_leds(
                     led_group=RvrLedGroups.all_lights.value,
-                    led_brightness_values=[100, 100, 100]
+                    led_brightness_values=[0, 0, 0]
                 )
                 led_on = True
             await asyncio.sleep(1)
