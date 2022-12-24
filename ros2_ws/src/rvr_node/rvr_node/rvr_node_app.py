@@ -78,8 +78,8 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('start_roll: "%s"' % msg.data)
-        speed = float(msg.data[0])
-        heading = float(msg.data[1])
+        speed = int(msg.data[0])
+        heading = int(msg.data[1])
         self.set_heading_local(heading)
         self.roll_start_helper(speed)
         self.get_logger().info('start_roll end %5.4f' % stopwatch.duration)
@@ -99,7 +99,7 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('roll_straight: "%s"' % msg.data)
-        speed = float(msg.data)
+        speed = int(msg.data)
         self.roll_start_helper(speed)
         self.get_logger().info('roll_straight end %5.4f' % stopwatch.duration)
 
@@ -112,7 +112,7 @@ class RvrNode(Node):
         )
 
     def set_heading_local(self, heading):
-        self.heading = float(heading) % 360.0
+        self.heading = int(heading) % 360
     
     def set_heading_helper(self):
         self.loop.run_until_complete(
@@ -125,7 +125,7 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('adjust_heading: "%s"' % msg.data)
-        heading_delta = float(msg.data)
+        heading_delta = int(msg.data)
         self.set_heading_local(self.heading + heading_delta)
         self.set_heading_helper()
         self.get_logger().info('adjust_heading end %5.4f' % stopwatch.duration)
@@ -134,7 +134,7 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('set_heading: "%s"' % msg.data)
-        heading = float(msg.data)
+        heading = int(msg.data)
         self.set_heading_local(heading)
         self.set_heading_helper()
         self.get_logger().info('set_heading end %5.4f' % stopwatch.duration)
