@@ -4,16 +4,16 @@ from launch_ros.actions import Node
 def generate_launch_description():
     ld = LaunchDescription()
 
-    rvr_server_node = Node(
-        package="rvr_server",
-        executable="sphero_node"
+    rvr_node = Node(
+        package="rvr_node",
+        executable="rvr_node"
     )
 
     robot_control = Node(
         package="robot_control",
-        executable="portal_app"
+        executable="robot_control"
     )
 
-    ld.add_action(rvr_server_node)
+    ld.add_action(rvr_node)
     ld.add_action(robot_control)
     return ld

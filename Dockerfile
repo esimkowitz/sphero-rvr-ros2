@@ -12,7 +12,7 @@ RUN . ../sphero-sdk-first-time-setup.sh
 WORKDIR /app
 
 RUN cd ros2_ws && \
-    python3 -m pip install -r ./src/rvr_server/requirements.txt && \
+    python3 -m pip install -r ./src/rvr_node/requirements.txt && \
     source /opt/ros/humble/setup.bash && \
     rosdep update && rosdep install --from-paths src -y --ignore-src && \
     colcon build

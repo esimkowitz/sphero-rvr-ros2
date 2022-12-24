@@ -1,3 +1,7 @@
 README.md
 docker-compose.yml
 Dockerfile
+
+# ROS 2
+ros2_ws/src/install/
+ros2_ws/src/log/

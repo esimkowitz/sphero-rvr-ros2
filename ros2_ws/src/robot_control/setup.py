@@ -23,12 +23,12 @@ setup(
           'Operating System :: POSIX :: Linux',
           'License :: OSI Approved :: MIT License',
           'Intended Audience :: Developers',
-          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.10',
           'Topic :: Software Development',
           'Topic :: System :: Hardware'],
     entry_points={
         'console_scripts': [
-            'portal_app = robot_control.portal_app:main'
+            'robot_control = robot_control.robot_control_app:main'
         ],
     },
 )

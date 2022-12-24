@@ -11,10 +11,12 @@ Runs in Docker for easy integration and streamlined dependency management.
 ## Current Functionality
 
 - Change leds using the `rvr_change_leds` topic.
-- Start the RVR rolling using the `rvr_start_roll` topic.
+- Start the RVR rolling in a given heading using the `rvr_start_roll` topic.
 - Stop the RVR using the `rvr_stop_roll` topic.
 - Change the RVR heading using the `rvr_set_heading` topic.
 - Reset the RVR heading using the `rvr_reset_heading` topic.
+- Adjust the RVR heading using the `rvr_adjust_heading` topic.
+- Roll at the current set heading using the `rvr_roll_straight` topic.
 
 ## Running directly via Docker
 
@@ -28,19 +30,23 @@ I have noticed that the exec shell will exit whenever there is a nonzero exit co
 
 ## Running via Docker Compose
 
-I've added a [docker-compose.yml](docker-compose.yml) file to run the ROS2 node in the background. You can run it via 
+I've added a [docker-compose.yml](docker-compose.yml) file to run the ROS2 node in the background. 
 
 ### Run and build via script
 
-I've added a shell script that can build the image before starting the Docker Compose for easier development: [run_docker_compose.sh](run_docker_compose.sh).
+I've added a shell script that can build the image before starting the Docker Compose for easier development: [run_docker_compose_build.sh](run_docker_compose_build.sh).
 
 ### Run using pre-built image
 
-```Bash
-sudo docker compose up
-```
+You can run it using a pre-built image with the following script: [run_docker_compose.sh](run_docker_compose.sh)
 
-## Publish commands to node
+## Control using the robot_control webpage
+
+By default, the docker-compose configuration will also launch a Flask app that can be used to control the robot remotely, mainly to demonstrate the performance of the ROS driver. This solution has been adapted from a previous robot project I was working on, [esimkowitz/RobotControl](https://github.com/esimkowitz/RobotControl).
+
+To load the page, visit `http://<robot-ip>:8080` in your web browser. Right now, you can control the robot using the WASD and arrow keys. I may add other buttons or extensibility as I build out the driver further.
+
+## Publish commands to node via ROS CLI
 
 You can publish commands by opening a Bash shell on the container running in Docker Compose.
 
@@ -60,4 +66,4 @@ Thank you [@gumstix/Altium](https://github.com/gumstix) for your [RVR ROS2 Node 
 
 ## License
 
-MIT &copy; Evan Simkowitz, 2022
+MIT &copy; Evan Simkowitz, 2022, see [LICENSE](LICENSE) for additional licenses.
