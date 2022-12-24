@@ -94,8 +94,21 @@ class RvrNode(Node):
     
     async def exec_loop(self):
         stopwatch = Stopwatch(3)
+        led_on = True
         while True:
             self.get_logger().info('ping %5.4f' % stopwatch.duration)
+            if led_on:
+                await self.rvr.set_all_leds(
+                    led_group=RvrLedGroups.all_lights.value,
+                    led_brightness_values=[100, 100, 100]
+                )
+                led_on = False
+            else:
+                await self.rvr.set_all_leds(
+                    led_group=RvrLedGroups.all_lights.value,
+                    led_brightness_values=[100, 100, 100]
+                )
+                led_on = True
             await asyncio.sleep(1)
     
     def awaken_robot(self):
