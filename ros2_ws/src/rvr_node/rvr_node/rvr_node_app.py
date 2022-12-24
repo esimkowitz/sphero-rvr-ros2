@@ -88,6 +88,13 @@ class RvrNode(Node):
             10)
         
         self.get_logger().info('RvrNode init finished')
+
+        asyncio.create_task(self.exec_loop())
+    
+    async def exec_loop(self):
+        while True:
+            self.get_logger().info('ping')
+            await asyncio.sleep(1)
     
     def awaken_robot(self):
         self.loop.run_until_complete(self.rvr.wake())
