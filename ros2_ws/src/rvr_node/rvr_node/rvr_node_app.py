@@ -4,6 +4,7 @@ import time
 sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python')) 
 
 import asyncio
+from enum import Enum
 from stopwatch import Stopwatch
 from sphero_sdk import SpheroRvrAsync
 from sphero_sdk import RvrLedGroups
@@ -25,13 +26,27 @@ encoder_global = {}
 
 received = 0x00     # received byte - fully received at 0x1f
 
-class RvrNode(Node):
+class RvrState(Enum):
+    Forward = 1
+    Backward = 2
+    Stop = 3
+    Sleep = 4
 
-    def __init__(self, rvr :SpheroRvrAsync, loop :asyncio.AbstractEventLoop) -> None:
+class RvrNode(Node):
+    rvr_state = RvrState.Sleep
+
+    def __init__(self) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
-        self.rvr = rvr
-        self.loop = loop
+        self.loop = asyncio.get_event_loop()
+        self.rvr = SpheroRvrAsync(
+            dal=SerialAsyncDal(
+                self.loop
+            )
+        )
+
+        self.awaken_robot()
+
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
             'rvr_sensors',  # publish to chatter channel
@@ -73,6 +88,12 @@ class RvrNode(Node):
             10)
         
         self.get_logger().info('RvrNode init finished')
+    
+    def awaken_robot(self):
+        self.loop.run_until_complete(self.rvr.wake())
+        # Give RVR time to wake up
+        self.loop.run_until_complete(asyncio.sleep(2))
+        self.rvr_state = RvrState.Stop
 
     def start_roll(self, msg):
         stopwatch = Stopwatch(3)
@@ -164,36 +185,22 @@ class RvrNode(Node):
             )
         )
         self.get_logger().info('set_leds end %5.4f' % stopwatch.duration)
+    
+    def cleanup(self):
+        self.rvr.sensor_control.clear()
+        self.rvr.close()
 
 def main(args=None):
-    """ This program demonstrates how to enable multiple sensors to stream."""
-    loop = asyncio.get_event_loop()
-    rvr = SpheroRvrAsync(
-        dal=SerialAsyncDal(
-            loop
-        )
-    )
-
-    loop.run_until_complete(rvr.wake())
-
     rclpy.init(args=args)
 
-    # Give RVR time to wake up
-    loop.run_until_complete(asyncio.sleep(2))
-
-    rvr_node = RvrNode(rvr, loop)
-
-    rvr_node.get_logger().info('RvrNode initialized')
+    rvr_node = RvrNode()
         
     # Reset the robot's heading to 0.0
     rvr_node.reset_heading()
 
-    rvr_node.get_logger().info('Rvr heading reset')
-
     rclpy.spin(rvr_node)
 
-    rvr.sensor_control.clear(),
-    rvr.close()
+    rvr_node.cleanup()
 
     rclpy.shutdown()
 
