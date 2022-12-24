@@ -40,7 +40,6 @@ class RvrNode(Node):
         self.get_logger().info('RvrNode init started')
         self.sdk_loop = asyncio.get_event_loop()
         self.logic_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.logic_loop)
         self.rvr = SpheroRvrAsync(
             dal=SerialAsyncDal(
                 self.sdk_loop
@@ -91,7 +90,7 @@ class RvrNode(Node):
         
         self.get_logger().info('RvrNode init finished')
 
-        asyncio.create_task(self.exec_loop())
+        self.logic_loop.create_task(self.exec_loop())
     
     async def exec_loop(self):
         stopwatch = Stopwatch(3)
