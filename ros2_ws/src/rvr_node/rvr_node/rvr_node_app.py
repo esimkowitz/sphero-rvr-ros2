@@ -98,10 +98,10 @@ class RvrNode(Node):
         while True:
             self.get_logger().info('ping %5.4f' % stopwatch.duration)
             if led_on:
-                await self.rvr.set_all_leds_rgb(100, 100, 100)
+                await self.rvr.turn_leds_off()
                 led_on = False
             else:
-                await self.rvr.set_all_leds_rgb(0, 0, 0)
+                await self.rvr.set_all_leds_rgb(100, 100, 100)
                 led_on = True
             await asyncio.sleep(1)
     
