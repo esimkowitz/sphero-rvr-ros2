@@ -98,16 +98,10 @@ class RvrNode(Node):
         while True:
             self.get_logger().info('ping %5.4f' % stopwatch.duration)
             if led_on:
-                await self.rvr.set_all_leds(
-                    led_group=RvrLedGroups.all_lights.value,
-                    led_brightness_values=[100, 100, 100]
-                )
+                await self.rvr.set_all_leds_rgb(100, 100, 100)
                 led_on = False
             else:
-                await self.rvr.set_all_leds(
-                    led_group=RvrLedGroups.all_lights.value,
-                    led_brightness_values=[0, 0, 0]
-                )
+                await self.rvr.set_all_leds_rgb(0, 0, 0)
                 led_on = True
             await asyncio.sleep(1)
     
@@ -201,10 +195,7 @@ class RvrNode(Node):
         G = int(led_data[1])
         B = int(led_data[2])
         self.sdk_loop.run_until_complete(
-            self.rvr.set_all_leds(
-                led_group=RvrLedGroups.all_lights.value,
-                led_brightness_values=[color for x in range(10) for color in [R, G, B]]
-            )
+            self.rvr.set_all_leds_rgb(R, G, B)
         )
         self.get_logger().info('set_leds end %5.4f' % stopwatch.duration)
     
