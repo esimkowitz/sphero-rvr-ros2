@@ -90,7 +90,7 @@ class RvrNode(Node):
         
         self.get_logger().info('RvrNode init finished')
 
-        self.sdk_loop.create_task(self.exec_loop())
+        asyncio.create_task(self.exec_loop())
     
     async def exec_loop(self):
         stopwatch = Stopwatch(3)
