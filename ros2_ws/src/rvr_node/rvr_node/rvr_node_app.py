@@ -90,8 +90,11 @@ class RvrNode(Node):
         
         self.get_logger().info('RvrNode init finished')
 
-        asyncio.create_task(self.exec_loop())
+        asyncio.run(self.run_exec_loop())
     
+    async def run_exec_loop(self):
+        self.heartbeat_task = asyncio.create_task(self.exec_loop())
+        
     async def exec_loop(self):
         stopwatch = Stopwatch(3)
         led_on = True
@@ -202,6 +205,7 @@ class RvrNode(Node):
     def cleanup(self):
         self.rvr.sensor_control.clear()
         self.rvr.close()
+        self.heartbeat_task.cancel()
 
 def main(args=None):
     rclpy.init(args=args)
