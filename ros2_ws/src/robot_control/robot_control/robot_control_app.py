@@ -9,7 +9,10 @@ import signal
 
 import rclpy
 from rclpy.node import Node
+from rclpy.action import ActionClient
 import std_msgs.msg
+
+from rvr_node.action import ChangeHeading
 
 app = Flask(__name__, template_folder='/app/ros2_ws/src/robot_control/robot_control/templates', static_folder='/app/ros2_ws/src/robot_control/robot_control/static')
 app.config['SECRET_KEY'] = 'secret!'
@@ -24,9 +27,7 @@ class RobotControlPublisher(Node):
         self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
         self.publish_rvr_roll_straight = self.create_publisher(std_msgs.msg.Float32, 'rvr_roll_straight', 10)
         self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10)
-        self.publish_rvr_adjust_heading = self.create_publisher(std_msgs.msg.Float32, 'rvr_adjust_heading', 10)
-        self.publish_rvr_set_heading = self.create_publisher(std_msgs.msg.Float32, 'rvr_set_heading', 10)
-        self.publish_rvr_reset_heading = self.create_publisher(std_msgs.msg.Empty, 'rvr_reset_heading', 10)
+        self.change_heading_client = ActionClient(self, ChangeHeading, 'change_heading')
 
     def rvr_change_leds(self, data):
         msg = std_msgs.msg.Float32MultiArray()
@@ -47,10 +48,13 @@ class RobotControlPublisher(Node):
         msg = std_msgs.msg.Empty()
         self.publish_rvr_stop_roll.publish(msg)
 
-    def rvr_adjust_heading(self, heading_delta):
-        msg = std_msgs.msg.Float32()
-        msg.data = heading_delta
-        self.publish_rvr_adjust_heading.publish(msg)
+    def rvr_change_heading(self, heading_theta):
+        goal_msg = ChangeHeading.Goal()
+        goal_msg.theta = heading_theta
+
+        self.change_heading_client.wait_for_server()
+
+        return self.change_heading_client.send_goal_async(goal_msg)
 
     def rvr_set_heading(self, heading):
         msg = std_msgs.msg.Float32()
@@ -58,10 +62,10 @@ class RobotControlPublisher(Node):
         self.publish_rvr_set_heading.publish(msg)
 
     def rvr_turn_left(self):
-        self.rvr_adjust_heading(-30.0)
+        self.rvr_change_heading(270.0)
 
     def rvr_turn_right(self):
-        self.rvr_adjust_heading(30.0)
+        self.rvr_change_heading(90.0)
 
     def rvr_reset_heading(self):
         msg = std_msgs.msg.Empty()
