@@ -10,7 +10,10 @@ from sphero_sdk import RvrLedGroups
 from sphero_sdk import SerialAsyncDal
 import rclpy
 from rclpy.node import Node
+from rclpy.action import ActionServer
 import std_msgs.msg
+
+from rvr_node.action import ChangeHeading
 
 debug = False
 delay = 250
@@ -61,17 +64,12 @@ class RvrNode(Node):
             'rvr_set_heading',
             self.set_heading,
             10)
-        self.adjust_heading_sub = self.create_subscription(
-            std_msgs.msg.Float32,
-            'rvr_adjust_heading',
-            self.adjust_heading,
-            10)
-        self.reset_heading_sub = self.create_subscription(
-            std_msgs.msg.Empty,
-            'rvr_reset_heading',
-            self.reset_heading,
-            10)
-        
+        self._action_server = ActionServer(
+            self,
+            ChangeHeading,
+            'change_heading',
+            self.change_heading)
+
         self.get_logger().info('RvrNode init finished')
 
     def start_roll(self, msg):
@@ -111,8 +109,10 @@ class RvrNode(Node):
             )
         )
 
-    def set_heading_local(self, heading):
-        self.heading = int(heading) % 360
+    def set_heading_local(self, new_heading):
+        retval = abs(self.heading - new_heading)
+        self.heading = int(new_heading) % 360
+        return retval
     
     def set_heading_helper(self):
         self.loop.run_until_complete(
@@ -121,33 +121,16 @@ class RvrNode(Node):
             )
         )
 
-    def adjust_heading(self, msg):
+    def change_heading(self, goal_handle):
         stopwatch = Stopwatch(3)
         stopwatch.start()
-        self.get_logger().info('adjust_heading: "%s"' % msg.data)
-        heading_delta = int(msg.data)
-        self.set_heading_local(self.heading + heading_delta)
+        theta = goal_handle.request.theta
+        self.get_logger().info('change_heading_start, theta: "%s"' % theta)
+        result = ChangeHeading.Result()
+        result.delta = self.set_heading_local(theta)
         self.set_heading_helper()
         self.get_logger().info('adjust_heading end %5.4f' % stopwatch.duration)
-
-    def set_heading(self, msg):
-        stopwatch = Stopwatch(3)
-        stopwatch.start()
-        self.get_logger().info('set_heading: "%s"' % msg.data)
-        heading = int(msg.data)
-        self.set_heading_local(heading)
-        self.set_heading_helper()
-        self.get_logger().info('set_heading end %5.4f' % stopwatch.duration)
-    
-    def reset_heading(self, msg=None):
-        stopwatch = Stopwatch(3)
-        stopwatch.start()
-        self.get_logger().info('reset_heading')
-        self.set_heading_local(0.0)
-        self.loop.run_until_complete(
-            self.rvr.drive_control.reset_heading()
-        )
-        self.get_logger().info('reset_heading end %5.4f' % stopwatch.duration)
+        return result
 
     def set_leds(self, msg):
         stopwatch = Stopwatch(3)
