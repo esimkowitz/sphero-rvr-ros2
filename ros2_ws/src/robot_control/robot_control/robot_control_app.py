@@ -56,11 +56,6 @@ class RobotControlPublisher(Node):
 
         return self.change_heading_client.send_goal_async(goal_msg)
 
-    def rvr_set_heading(self, heading):
-        msg = std_msgs.msg.Float32()
-        msg.data = heading % 360.0
-        self.publish_rvr_set_heading.publish(msg)
-
     def rvr_turn_left(self):
         self.rvr_change_heading(270.0)
 

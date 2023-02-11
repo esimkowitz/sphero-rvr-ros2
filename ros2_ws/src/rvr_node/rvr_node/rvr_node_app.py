@@ -59,11 +59,6 @@ class RvrNode(Node):
             'rvr_roll_straight',
             self.roll_straight,
             10)
-        self.set_heading_sub = self.create_subscription(
-            std_msgs.msg.Float32,
-            'rvr_set_heading',
-            self.set_heading,
-            10)
         self._action_server = ActionServer(
             self,
             ChangeHeading,
