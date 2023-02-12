@@ -30,11 +30,23 @@ received = 0x00     # received byte - fully received at 0x1f
 
 class RvrNode(Node):
 
-    def __init__(self, rvr :SpheroRvrAsync, loop :asyncio.AbstractEventLoop) -> None:
+    def __init__(self, loop :asyncio.AbstractEventLoop) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
-        self.rvr = rvr
         self.loop = loop
+        self.rvr = SpheroRvrAsync(
+            dal=SerialAsyncDal(
+                self.loop
+            )
+        )
+
+        self.loop.run_until_complete(self.rvr.wake())
+        self.get_logger().info('Rvr is awake')
+
+        # Give RVR time to wake up
+        self.loop.run_until_complete(asyncio.sleep(2))
+
+
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
             'rvr_sensors',  # publish to chatter channel
@@ -61,6 +73,10 @@ class RvrNode(Node):
             self.change_heading)
 
         self.get_logger().info('RvrNode init finished')
+
+    def close(self):
+        self.rvr.sensor_control.clear(),
+        self.rvr.close()
 
     def start_roll(self, msg):
         stopwatch = Stopwatch(3)
@@ -130,21 +146,9 @@ class RvrNode(Node):
 
 def main(args=None):
     """ This program demonstrates how to enable multiple sensors to stream."""
-    loop = asyncio.get_event_loop()
-    rvr = SpheroRvrAsync(
-        dal=SerialAsyncDal(
-            loop
-        )
-    )
+    rclpy.init()
 
-    loop.run_until_complete(rvr.wake())
-
-    rclpy.init(args=args)
-
-    # Give RVR time to wake up
-    loop.run_until_complete(asyncio.sleep(2))
-
-    rvr_node = RvrNode(rvr, loop)
+    rvr_node = RvrNode(asyncio.get_event_loop())
 
     rvr_node.get_logger().info('RvrNode initialized')
         
@@ -156,8 +160,7 @@ def main(args=None):
 
     rclpy.spin(rvr_node)
 
-    rvr.sensor_control.clear(),
-    rvr.close()
+    rvr_node.close()
 
     rclpy.shutdown()
 

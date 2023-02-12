@@ -82,11 +82,13 @@ def control_event():
                 publisher.rvr_start_roll_reverse()
                 publisher.get_logger().info('robot backward')
             case 'l':
+                publisher.get_logger().info('robot start left')
                 publisher.rvr_turn_left()
-                publisher.get_logger().info('robot left')
+                publisher.get_logger().info('robot end left')
             case 'r':
+                publisher.get_logger().info('robot start right')
                 publisher.rvr_turn_right()
-                publisher.get_logger().info('robot right')
+                publisher.get_logger().info('robot end right')
             case 's':
                 publisher.rvr_stop_roll()
                 publisher.get_logger().info('robot stop')
