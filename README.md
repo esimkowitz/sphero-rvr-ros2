@@ -66,4 +66,4 @@ Thank you [@gumstix/Altium](https://github.com/gumstix) for your [RVR ROS2 Node 
 
 ## License
 
-MIT &copy; Evan Simkowitz, 2022, see [LICENSE](LICENSE) for additional licenses.
+MIT &copy; Evan Simkowitz, 2022, see [LICENSE](LICENSE.md) for additional licenses.
