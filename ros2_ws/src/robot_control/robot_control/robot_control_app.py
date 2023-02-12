@@ -12,7 +12,7 @@ from rclpy.node import Node
 from rclpy.action import ActionClient
 import std_msgs.msg
 
-from rvr_node.action import ChangeHeading
+from rvr_interfaces.action import ChangeHeading
 
 app = Flask(__name__, template_folder='/app/ros2_ws/src/robot_control/robot_control/templates', static_folder='/app/ros2_ws/src/robot_control/robot_control/static')
 app.config['SECRET_KEY'] = 'secret!'

@@ -13,7 +13,7 @@ from rclpy.node import Node
 from rclpy.action import ActionServer
 import std_msgs.msg
 
-from rvr_node.action import ChangeHeading
+from rvr_interfaces.action import ChangeHeading
 
 debug = False
 delay = 250
