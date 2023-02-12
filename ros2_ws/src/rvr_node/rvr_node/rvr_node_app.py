@@ -39,7 +39,8 @@ class RvrNode(Node):
                 self.loop
             )
         )
-
+        
+        self.get_logger().info('Rvr client is created, waking up')
         self.loop.run_until_complete(self.rvr.wake(10.0))
         self.get_logger().info('Rvr is awake')
 
@@ -145,8 +146,7 @@ class RvrNode(Node):
         self.get_logger().info('set_leds end %5.4f' % stopwatch.duration)
 
 def main(args=None):
-    """ This program demonstrates how to enable multiple sensors to stream."""
-    rclpy.init()
+    rclpy.init(args=args)
 
     rvr_node = RvrNode(asyncio.get_event_loop())
 

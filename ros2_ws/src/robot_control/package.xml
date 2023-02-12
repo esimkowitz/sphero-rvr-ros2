@@ -9,7 +9,6 @@
 
   <exec_depend>rclpy</exec_depend>
   <depend>python3-flask</depend>
-  <depend>rvr_node</depend>
   <depend>rvr_interfaces</depend>
 
   <test_depend>ament_copyright</test_depend>
