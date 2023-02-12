@@ -45,7 +45,7 @@ class RvrNode(Node):
             self.set_leds,
             10)
         self.start_roll_sub = self.create_subscription(
-            std_msgs.msg.Float32MultiArray,
+            std_msgs.msg.Float32,
             'rvr_start_roll',   
             self.start_roll,
             10)
@@ -53,11 +53,6 @@ class RvrNode(Node):
             std_msgs.msg.Empty,
             'rvr_stop_roll',
             self.stop_roll,
-            10)
-        self.roll_straight_sub = self.create_subscription(
-            std_msgs.msg.Float32,
-            'rvr_roll_straight',
-            self.roll_straight,
             10)
         self._action_server = ActionServer(
             self,
@@ -71,9 +66,7 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('start_roll: "%s"' % msg.data)
-        speed = int(msg.data[0])
-        heading = int(msg.data[1])
-        self.set_heading_local(heading)
+        speed = int(msg.data)
         self.roll_start_helper(speed)
         self.get_logger().info('start_roll end %5.4f' % stopwatch.duration)
 
@@ -87,14 +80,6 @@ class RvrNode(Node):
             )
         )
         self.get_logger().info('stop_roll end %5.4f' % stopwatch.duration)
-
-    def roll_straight(self, msg):
-        stopwatch = Stopwatch(3)
-        stopwatch.start()
-        self.get_logger().info('roll_straight: "%s"' % msg.data)
-        speed = int(msg.data)
-        self.roll_start_helper(speed)
-        self.get_logger().info('roll_straight end %5.4f' % stopwatch.duration)
 
     def roll_start_helper(self, speed):
         self.loop.run_until_complete(
