@@ -149,7 +149,8 @@ def main(args=None):
     rvr_node.get_logger().info('RvrNode initialized')
         
     # Reset the robot's heading to 0.0
-    rvr_node.reset_heading()
+    rvr_node.set_heading_local(0.0)
+    rvr_node.set_heading_helper()
 
     rvr_node.get_logger().info('Rvr heading reset')
 
