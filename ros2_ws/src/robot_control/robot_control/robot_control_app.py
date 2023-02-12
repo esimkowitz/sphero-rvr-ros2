@@ -62,10 +62,6 @@ class RobotControlPublisher(Node):
     def rvr_turn_right(self):
         self.rvr_change_heading(90.0)
 
-    def rvr_reset_heading(self):
-        msg = std_msgs.msg.Empty()
-        self.publish_rvr_reset_heading.publish(msg)
-
 rclpy.init(args=None)
 publisher = RobotControlPublisher()
 
