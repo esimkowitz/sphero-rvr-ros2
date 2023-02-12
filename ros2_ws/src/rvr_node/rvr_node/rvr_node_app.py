@@ -34,9 +34,13 @@ class RvrNode(Node):
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
         self.loop = loop
-        self.rvr = SpheroRvrAsync()
+        self.rvr = SpheroRvrAsync(
+            dal=SerialAsyncDal(
+                self.loop
+            )
+        )
         
-        self.get_logger().info('Rvr client is created, waking up')
+        self.get_logger().info('Rvr client is created, waking')
         self.loop.run_until_complete(self.rvr.wake(10.0))
         self.get_logger().info('Rvr is awake')
 
