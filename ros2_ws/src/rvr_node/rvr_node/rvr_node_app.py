@@ -40,7 +40,7 @@ class RvrNode(Node):
             )
         )
 
-        self.loop.run_until_complete(self.rvr.wake())
+        self.loop.run_until_complete(self.rvr.wake(10.0))
         self.get_logger().info('Rvr is awake')
 
         # Give RVR time to wake up
