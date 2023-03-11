@@ -3,11 +3,9 @@ import sys
 import time
 sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python')) 
 
-import asyncio
 from stopwatch import Stopwatch
-from sphero_sdk import SpheroRvrAsync
+from sphero_sdk import SpheroRvrObserver
 from sphero_sdk import RvrLedGroups
-from sphero_sdk import SerialAsyncDal
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
@@ -33,20 +31,15 @@ class RvrNode(Node):
     def __init__(self) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
-        self.loop = asyncio.get_event_loop()
         self.heading = 0.0
-        self.rvr = SpheroRvrAsync(
-            dal=SerialAsyncDal(
-                self.loop
-            )
-        )
+        self.rvr = SpheroRvrObserver()
         
         self.get_logger().info('Rvr client is created, waking')
-        self.loop.run_until_complete(self.rvr.wake(10.0))
+        self.rvr.wake(10.0)
         self.get_logger().info('Rvr is awake')
 
         # Give RVR time to wake up
-        self.loop.run_until_complete(asyncio.sleep(2))
+        time.sleep(2)
 
 
         self.publisher_ = self.create_publisher(
@@ -92,19 +85,16 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('stop_roll')
-        self.loop.run_until_complete(
-            self.rvr.drive_control.roll_stop(
-                heading=self.heading
-            )
+        self.rvr.drive_control.roll_stop(
+            heading=self.heading
         )
+        
         self.get_logger().info('stop_roll end %5.4f' % stopwatch.duration)
 
     def roll_start_helper(self, speed):
-        self.loop.run_until_complete(
-            self.rvr.drive_control.roll_start(
-                speed=speed,
-                heading=self.heading
-            )
+        self.rvr.drive_control.roll_start(
+            speed=speed,
+            heading=self.heading
         )
 
     def set_heading_local(self, new_heading):
@@ -113,10 +103,8 @@ class RvrNode(Node):
         return retval
     
     def set_heading_helper(self):
-        self.loop.run_until_complete(
-            self.rvr.drive_control.set_heading(
-                heading=self.heading
-            )
+        self.rvr.drive_control.set_heading(
+            heading=self.heading
         )
 
     def change_heading(self, goal_handle):
@@ -138,11 +126,9 @@ class RvrNode(Node):
         R = int(led_data[0])
         G = int(led_data[1])
         B = int(led_data[2])
-        self.loop.run_until_complete(
-            self.rvr.set_all_leds(
-                led_group=RvrLedGroups.all_lights.value,
-                led_brightness_values=[color for x in range(10) for color in [R, G, B]]
-            )
+        self.rvr.set_all_leds(
+            led_group=RvrLedGroups.all_lights.value,
+            led_brightness_values=[color for x in range(10) for color in [R, G, B]]
         )
         self.get_logger().info('set_leds end %5.4f' % stopwatch.duration)
 
