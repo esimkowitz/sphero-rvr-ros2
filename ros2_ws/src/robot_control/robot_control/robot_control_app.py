@@ -25,7 +25,7 @@ class RobotControlPublisher(Node):
     def __init__(self):
         super().__init__('robot_control_node')
         self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
-        self.publish_rvr_roll_straight = self.create_publisher(std_msgs.msg.Float32, 'rvr_roll_straight', 10)
+        self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_start_roll', 10)
         self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10)
         self.change_heading_client = ActionClient(self, ChangeHeading, 'change_heading')
 
@@ -37,12 +37,12 @@ class RobotControlPublisher(Node):
     def rvr_start_roll_forward(self):
         msg = std_msgs.msg.Float32()
         msg.data = 30.0
-        self.publish_rvr_roll_straight.publish(msg)
+        self.publish_rvr_start_roll.publish(msg)
 
     def rvr_start_roll_reverse(self):
         msg = std_msgs.msg.Float32()
         msg.data = -30.0
-        self.publish_rvr_roll_straight.publish(msg)
+        self.publish_rvr_start_roll.publish(msg)
 
     def rvr_stop_roll(self):
         msg = std_msgs.msg.Empty()

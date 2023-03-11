@@ -26,21 +26,21 @@ encoder_global = {}
 
 received = 0x00     # received byte - fully received at 0x1f
 
+rvr = SpheroRvrObserver()
+
 class RvrNode(Node):
 
     def __init__(self) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
         self.heading = 0.0
-        self.rvr = SpheroRvrObserver()
         
         self.get_logger().info('Rvr client is created, waking')
-        self.rvr.wake(10.0)
+        rvr.wake(10.0)
         self.get_logger().info('Rvr is awake')
 
         # Give RVR time to wake up
         time.sleep(2)
-
 
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
@@ -70,8 +70,8 @@ class RvrNode(Node):
         self.get_logger().info('RvrNode init finished')
 
     def close(self):
-        self.rvr.sensor_control.clear(),
-        self.rvr.close()
+        rvr.sensor_control.clear(),
+        rvr.close()
 
     def start_roll(self, msg):
         stopwatch = Stopwatch(3)
@@ -85,14 +85,14 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('stop_roll')
-        self.rvr.drive_control.roll_stop(
+        rvr.drive_control.roll_stop(
             heading=self.heading
         )
         
         self.get_logger().info('stop_roll end %5.4f' % stopwatch.duration)
 
     def roll_start_helper(self, speed):
-        self.rvr.drive_control.roll_start(
+        rvr.drive_control.roll_start(
             speed=speed,
             heading=self.heading
         )
@@ -103,7 +103,7 @@ class RvrNode(Node):
         return retval
     
     def set_heading_helper(self):
-        self.rvr.drive_control.set_heading(
+        rvr.drive_control.set_heading(
             heading=self.heading
         )
 
@@ -126,7 +126,7 @@ class RvrNode(Node):
         R = int(led_data[0])
         G = int(led_data[1])
         B = int(led_data[2])
-        self.rvr.set_all_leds(
+        rvr.set_all_leds(
             led_group=RvrLedGroups.all_lights.value,
             led_brightness_values=[color for x in range(10) for color in [R, G, B]]
         )
