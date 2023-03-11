@@ -30,10 +30,10 @@ received = 0x00     # received byte - fully received at 0x1f
 
 class RvrNode(Node):
 
-    def __init__(self, loop :asyncio.AbstractEventLoop) -> None:
+    def __init__(self) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
-        self.loop = loop
+        self.loop = asyncio.get_event_loop()
         self.heading = 0.0
         self.rvr = SpheroRvrAsync(
             dal=SerialAsyncDal(
@@ -149,7 +149,7 @@ class RvrNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    rvr_node = RvrNode(asyncio.get_event_loop())
+    rvr_node = RvrNode()
 
     rvr_node.get_logger().info('RvrNode initialized')
         
