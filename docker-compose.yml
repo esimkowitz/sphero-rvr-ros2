@@ -9,6 +9,6 @@ services:
         privileged: true
         ports:
           - '8080:8080'
-        command: /app/scripts/container/docker_compose_start_robot.sh
+        command: ros2 launch rvr_bringup portal_and_server.launch.py
         volumes:
           - /dev:/dev
