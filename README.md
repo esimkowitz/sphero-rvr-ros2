@@ -34,7 +34,7 @@ I've added a [docker-compose.yml](docker-compose.yml) file to run the ROS2 node 
 
 ### Run via script
 
-I've added a shell script to start the Docker Compose services with the necssary variables: [run_docker_compose.sh](run_docker_compose.sh).
+I've added a shell script to start the Docker Compose services with the necssary variables: [run_docker_compose.sh](scripts/helper/run_docker_compose.sh).
 
 The script specifies two optional flags:
 
@@ -57,7 +57,7 @@ To start the Bash shell, run the following command:
 docker compose exec rvr_server bash
 ```
 
-Then, you can use the commands in the [test_commands.sh](test_commands.sh) file to publish commands to the running node.
+Then, you can use the commands in the [test_commands.sh](scripts/helper/test_commands.sh) file to publish commands to the running node.
 
 ## Credit
 
