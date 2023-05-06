@@ -39,7 +39,7 @@ class RvrNode(Node):
         rvr.wake()
         self.get_logger().info('Rvr is awake')
 
-        rvr.on_weel_sleep_notify(self.keep_alive)
+        rvr.on_will_sleep_notify(self.keep_alive)
 
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
