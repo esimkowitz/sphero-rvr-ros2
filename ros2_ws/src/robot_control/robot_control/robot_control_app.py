@@ -61,8 +61,8 @@ def control_event():
 
         speed, heading = control_str.split(',')
         
-        publisher.rvr_change_heading(heading)
-        publisher.rvr_send_speed(speed)
+        publisher.rvr_change_heading(float(heading))
+        publisher.rvr_send_speed(float(speed))
 
     return 'OK'
 
