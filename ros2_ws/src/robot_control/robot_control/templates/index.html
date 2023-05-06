@@ -148,11 +148,16 @@
       color: "blue",
     });
 
+    function radToDeg(radians) {
+      return radians * (180/Math.PI);
+    }
+
     manager.on("move", function (event, data) {
-      heading = (data.angle.degree - 90) % 360;
+      heading = radToDeg(data.angle.radian + Math.PI) + 90;
       speed = data.distance;
       send_control();
     });
+
     manager.on("end", function (event) {
       stop();
     });
