@@ -36,7 +36,7 @@ class RobotControlPublisher(Node):
 
     def rvr_send_speed(self, speed):
         msg = std_msgs.msg.Float32()
-        msg.data = -30.0
+        msg.data = speed
         self.publish_rvr_start_roll.publish(msg)
 
     def rvr_change_heading(self, heading_theta):
@@ -61,8 +61,8 @@ def control_event():
 
         speed, heading = control_str.split(',')
         
-        publisher.rvr_change_heading(round(float(heading)))
-        publisher.rvr_send_speed(round(float(speed)))
+        publisher.rvr_change_heading(float(round(float(heading))))
+        publisher.rvr_send_speed(float(round(float(speed))))
 
     return 'OK'
 

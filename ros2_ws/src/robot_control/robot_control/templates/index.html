@@ -149,7 +149,7 @@
     });
 
     manager.on("move", function (event, data) {
-      heading = data.angle.degree;
+      heading = (data.angle.degree - 90) % 360;
       speed = data.distance;
       send_control();
     });
