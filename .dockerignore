@@ -1,7 +1,26 @@
 README.md
 docker-compose.yml
 Dockerfile
+.dockerignore
+docker-compose.yml
+*LICENSE.md
 
 # ROS 2
 ros2_ws/src/install/
 ros2_ws/src/log/
+
+# Sphero SDK
+sphero-sdk/sphero-sdk-raspberry-pi/docs/
+sphero-sdk/sphero-sdk-raspberry-pi/getting_started/
+sphero-sdk/sphero-sdk-raspberry-pi/projects/
+!sphero-sdk/sphero-sdk-raspberry-pi/getting_started/observer/leds/set_all_leds.py
+sphero-sdk/sphero-sdk-raspberry-pi/tools/
+
+*.gitignore
+*.gitmodules
+*.git/
+.DS_Store
+.devcontainer
+.github
+helper-scripts/
+*.pdf

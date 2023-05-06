@@ -1,6 +1,6 @@
 FROM arm64v8/ros:humble-ros-base
 SHELL [ "/bin/bash", "-c" ]
-RUN apt-get update && apt-get install -y python3 python3-pip
+RUN apt-get update && apt-get install -y python3 python3-pip && apt autoremove && apt clean
 ENV PYTHONWARNINGS ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources
 
 COPY . /app
@@ -17,6 +17,6 @@ RUN cd ros2_ws && \
     rosdep update && rosdep install --from-paths src -y --ignore-src && \
     colcon build
 
-RUN rm /ros_entrypoint.sh && echo "source /app/scripts/ros_entrypoint.sh" >> ~/.bashrc
+RUN rm /ros_entrypoint.sh && echo "source /app/scripts/container/ros_entrypoint.sh" >> ~/.bashrc
 EXPOSE 8080
-ENTRYPOINT [ "/app/scripts/ros_entrypoint.sh" ]
+ENTRYPOINT [ "/app/scripts/container/ros_entrypoint.sh" ]
