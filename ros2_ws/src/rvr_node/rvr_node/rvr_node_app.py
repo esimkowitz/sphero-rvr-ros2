@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python'))
 from stopwatch import Stopwatch
 from sphero_sdk import SpheroRvrObserver
 from sphero_sdk import RvrLedGroups
+from sphero_sdk import Colors
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
@@ -34,13 +35,6 @@ class RvrNode(Node):
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
         self.heading = 0.0
-        
-        self.get_logger().info('Rvr client is created, waking')
-        rvr.wake(10.0)
-        self.get_logger().info('Rvr is awake')
-
-        # Give RVR time to wake up
-        time.sleep(2)
 
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
@@ -133,6 +127,27 @@ class RvrNode(Node):
         self.get_logger().info('set_leds end %5.4f' % stopwatch.duration)
 
 def main(args=None):
+
+    rvr.wake()
+
+    time.sleep(2)
+
+    rvr.set_all_leds(
+        led_group=RvrLedGroups.all_lights.value,
+        led_brightness_values=[color for _ in range(10) for color in Colors.off.value]
+    )
+
+    # Delay to show LEDs change
+    time.sleep(1)
+
+    rvr.set_all_leds(
+        led_group=RvrLedGroups.all_lights.value,
+        led_brightness_values=[color for _ in range(10) for color in [255, 0, 0]]
+    )
+
+    # Delay to show LEDs change
+    time.sleep(1)
+
     rclpy.init(args=args)
 
     rvr_node = RvrNode()
