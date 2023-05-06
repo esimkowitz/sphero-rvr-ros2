@@ -57,7 +57,7 @@ class RobotControlPublisher(Node):
         return self.change_heading_client.send_goal_async(goal_msg)
 
     def rvr_turn_left(self):
-        self.rvr_change_heading(270.0)
+        self.rvr_change_heading(-90.0)
 
     def rvr_turn_right(self):
         self.rvr_change_heading(90.0)
