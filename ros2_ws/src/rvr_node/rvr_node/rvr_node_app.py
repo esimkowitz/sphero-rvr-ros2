@@ -36,11 +36,10 @@ class RvrNode(Node):
         self.heading = 0.0
         
         self.get_logger().info('Rvr client is created, waking')
-        rvr.wake(10.0)
+        rvr.wake()
         self.get_logger().info('Rvr is awake')
 
-        # Give RVR time to wake up
-        time.sleep(2)
+        rvr.on_weel_sleep_notify(self.keep_alive)
 
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
@@ -72,6 +71,9 @@ class RvrNode(Node):
     def close(self):
         rvr.sensor_control.clear(),
         rvr.close()
+
+    def keep_alive(self):
+        rvr.wake()
 
     def start_roll(self, msg):
         stopwatch = Stopwatch(3)
