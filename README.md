@@ -1,6 +1,6 @@
 # Containerized RO2 Node for Sphero RVR
 
-Pyhton3 based [ROS2](https://docs.ros.org/en/humble/#) node for interacting with [Sphero RVR](https://www.sphero.com/rvr).
+Pyhton 3 [ROS2](https://docs.ros.org/en/humble/#) node for interacting with [Sphero RVR](https://www.sphero.com/rvr).
 
 Runs in Docker for easy integration and streamlined dependency management.
 
@@ -67,4 +67,4 @@ Thank you [@gumstix/Altium](https://github.com/gumstix) for your [RVR ROS2 Node 
 
 ## License
 
-MIT &copy; Evan Simkowitz, 2022, see [LICENSE](LICENSE.md) for additional licenses.
+MIT &copy; Evan Simkowitz, 2023, see [LICENSE](LICENSE.md) for additional licenses.
