@@ -17,6 +17,6 @@ RUN cd ros2_ws && \
     rosdep update && rosdep install --from-paths src -y --ignore-src && \
     colcon build
 
-RUN rm /ros_entrypoint.sh && echo "source /app/ros_entrypoint.sh" >> ~/.bashrc
+RUN rm /ros_entrypoint.sh && echo "source /app/scripts/ros_entrypoint.sh" >> ~/.bashrc
 EXPOSE 8080
-ENTRYPOINT [ "/app/ros_entrypoint.sh" ]
+ENTRYPOINT [ "/app/scripts/ros_entrypoint.sh" ]
