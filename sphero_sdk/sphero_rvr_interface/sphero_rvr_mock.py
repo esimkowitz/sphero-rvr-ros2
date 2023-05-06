@@ -1,4 +1,4 @@
-from sphero_rvr_interface import SpheroRvrInterface
+from . import SpheroRvrInterface
 
 class SpheroRvrMock(metaclass=SpheroRvrInterface):
     def wake(self) -> None:
@@ -9,7 +9,7 @@ class SpheroRvrMock(metaclass=SpheroRvrInterface):
         """Close the connection to the RVR and put it to sleep"""
         pass
 
-    def on_will_sleep_notify(self, handler:function, timeout: float) -> None:
+    def on_will_sleep_notify(self, handler, timeout: float) -> None:
         """Run an action 10s before the RVR sleeps."""
         pass
     

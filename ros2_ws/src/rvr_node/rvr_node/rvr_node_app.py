@@ -8,9 +8,8 @@ from rclpy.action import ActionServer
 import std_msgs.msg
 
 from rvr_interfaces.action import ChangeHeading
-from sphero_sdk.sphero_rvr_interface.sphero_rvr_interface import SpheroRvrInterface
-from sphero_sdk.sphero_rvr_interface.sphero_rvr_client import SpheroRvrClient
-from sphero_sdk.sphero_rvr_interface.sphero_rvr_mock import SpheroRvrMock
+
+from sphero_sdk.sphero_rvr_interface import SpheroRvrInterface, SpheroRvrClient, SpheroRvrMock
 
 class RvrNode(Node):
 

@@ -1,13 +1,6 @@
-import os
-import sys
-import time
-sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python')) 
-
-from stopwatch import Stopwatch
 from sphero_sdk.sphero_sdk_raspberry_python.sphero_sdk import SpheroRvrObserver
-from sphero_sdk import RvrLedGroups
 
-from sphero_rvr_interface import SpheroRvrInterface
+from . import SpheroRvrInterface
 
 debug = False
 delay = 250
@@ -35,7 +28,7 @@ class SpheroRvrClient(metaclass=SpheroRvrInterface):
         rvr.sensor_control.clear(),
         rvr.close()
 
-    def on_will_sleep_notify(self, handler:function, timeout: float) -> None:
+    def on_will_sleep_notify(self, handler, timeout: float) -> None:
         """Run an action 10s before the RVR sleeps."""
         rvr.on_will_sleep_notify(handler=handler, timeout=timeout)
     

@@ -12,7 +12,7 @@ class SpheroRvrInterface(ABC):
         pass
 
     @abstractmethod
-    def on_will_sleep_notify(self, handler:function, timeout: float) -> None:
+    def on_will_sleep_notify(self, handler, timeout: float) -> None:
         """Run an action 10s before the RVR sleeps."""
         pass
     
