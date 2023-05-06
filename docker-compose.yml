@@ -11,4 +11,4 @@ services:
           - '8080:8080'
         command: ros2 launch rvr_bringup portal_and_server.launch.py
         volumes:
-          - /dev/ttyS0:/dev/ttyS0
+          - /dev:/dev
