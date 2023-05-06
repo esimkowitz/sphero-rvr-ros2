@@ -1,11 +1,12 @@
-README.md
+*.md
 docker-compose.yml
 Dockerfile
 .dockerignore
 docker-compose.yml
-*LICENSE.md
+*LICENSE*
 
 # ROS 2
+ros2_ws/src/build/
 ros2_ws/src/install/
 ros2_ws/src/log/
 
