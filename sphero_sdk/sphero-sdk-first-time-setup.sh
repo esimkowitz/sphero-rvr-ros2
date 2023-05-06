@@ -4,7 +4,7 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # Install the SDK dependencies (only for the current user)
-pip3 install --user -r $SCRIPT_DIR/sphero-sdk-raspberry-python/requirements.txt
+pip3 install --user -r $SCRIPT_DIR/sphero_sdk_raspberry_python/requirements.txt
 
 # Reload ~/.profile.  In recent Raspberry Pi OS releases, this automatically includes $HOME/.local/bin in the path once it exists.
 source ~/.profile

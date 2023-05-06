@@ -1,45 +1,32 @@
-import os
-import sys
 import time
-sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python')) 
+import os
 
 from stopwatch import Stopwatch
-from sphero_sdk import SpheroRvrObserver
-from sphero_sdk import RvrLedGroups
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
 import std_msgs.msg
 
 from rvr_interfaces.action import ChangeHeading
-
-debug = False
-delay = 250
-size = 31 
-
-# sensor variable initialization
-imu_global = {}
-color_global = {}
-accelerometer_global = {}
-ambient_global = {}
-encoder_global = {}
-
-received = 0x00     # received byte - fully received at 0x1f
-
-rvr = SpheroRvrObserver()
+from sphero_sdk.sphero_rvr_interface.sphero_rvr_interface import SpheroRvrInterface
+from sphero_sdk.sphero_rvr_interface.sphero_rvr_client import SpheroRvrClient
+from sphero_sdk.sphero_rvr_interface.sphero_rvr_mock import SpheroRvrMock
 
 class RvrNode(Node):
 
-    def __init__(self) -> None:
+    def __init__(self, rvr: SpheroRvrInterface) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
         self.heading = 0.0
+
+        self.rvr = rvr
         
         self.get_logger().info('Rvr client is created, waking')
-        rvr.wake()
+        self.rvr.wake()
+        time.sleep(1)
         self.get_logger().info('Rvr is awake')
 
-        rvr.on_will_sleep_notify(self.keep_alive)
+        self.rvr.on_will_sleep_notify(self.keep_alive)
 
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
@@ -69,11 +56,10 @@ class RvrNode(Node):
         self.get_logger().info('RvrNode init finished')
 
     def close(self):
-        rvr.sensor_control.clear(),
-        rvr.close()
+        self.rvr.close()
 
     def keep_alive(self):
-        rvr.wake()
+        self.rvr.wake()
 
     def start_roll(self, msg):
         stopwatch = Stopwatch(3)
@@ -87,14 +73,14 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('stop_roll')
-        rvr.drive_control.roll_stop(
+        self.rvr.stop_roll(
             heading=self.heading
         )
         
         self.get_logger().info('stop_roll end %5.4f' % stopwatch.duration)
 
     def roll_start_helper(self, speed):
-        rvr.drive_control.roll_start(
+        self.rvr.start_roll(
             speed=speed,
             heading=self.heading
         )
@@ -105,7 +91,7 @@ class RvrNode(Node):
         return retval
     
     def set_heading_helper(self):
-        rvr.drive_control.set_heading(
+        self.rvr.set_heading(
             heading=self.heading
         )
 
@@ -124,20 +110,14 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('set_leds: "%s"' % msg.data)
-        led_data = msg.data
-        R = int(led_data[0])
-        G = int(led_data[1])
-        B = int(led_data[2])
-        rvr.set_all_leds(
-            led_group=RvrLedGroups.all_lights.value,
-            led_brightness_values=[color for x in range(10) for color in [R, G, B]]
-        )
         self.get_logger().info('set_leds end %5.4f' % stopwatch.duration)
 
 def main(args=None):
     rclpy.init(args=args)
 
-    rvr_node = RvrNode()
+    rvr_client = SpheroRvrMock() if bool(os.getenv("MOCK_RVR")) else SpheroRvrClient()
+
+    rvr_node = RvrNode(rvr_client)
 
     rvr_node.get_logger().info('RvrNode initialized')
         
