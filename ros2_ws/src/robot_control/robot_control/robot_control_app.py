@@ -34,19 +34,10 @@ class RobotControlPublisher(Node):
         msg.data = data
         self.publish_rvr_change_leds.publish(msg)
 
-    def rvr_start_roll_forward(self):
-        msg = std_msgs.msg.Float32()
-        msg.data = 30.0
-        self.publish_rvr_start_roll.publish(msg)
-
-    def rvr_start_roll_reverse(self):
+    def rvr_send_speed(self, speed):
         msg = std_msgs.msg.Float32()
         msg.data = -30.0
         self.publish_rvr_start_roll.publish(msg)
-
-    def rvr_stop_roll(self):
-        msg = std_msgs.msg.Empty()
-        self.publish_rvr_stop_roll.publish(msg)
 
     def rvr_change_heading(self, heading_theta):
         goal_msg = ChangeHeading.Goal()
@@ -55,12 +46,6 @@ class RobotControlPublisher(Node):
         self.change_heading_client.wait_for_server()
 
         return self.change_heading_client.send_goal_async(goal_msg)
-
-    def rvr_turn_left(self):
-        self.rvr_change_heading(-90.0)
-
-    def rvr_turn_right(self):
-        self.rvr_change_heading(90.0)
 
 rclpy.init(args=None)
 publisher = RobotControlPublisher()
@@ -72,28 +57,12 @@ def index():
 @app.route('/control_event', methods=['POST'])
 def control_event():
     if request.method == 'POST':
-        control = request.form['control']
+        control_str = request.form['control']
 
-        match control:
-            case 'f': 
-                publisher.rvr_start_roll_forward()
-                publisher.get_logger().info('robot forward')
-            case 'b':
-                publisher.rvr_start_roll_reverse()
-                publisher.get_logger().info('robot backward')
-            case 'l':
-                publisher.get_logger().info('robot start left')
-                publisher.rvr_turn_left()
-                publisher.get_logger().info('robot end left')
-            case 'r':
-                publisher.get_logger().info('robot start right')
-                publisher.rvr_turn_right()
-                publisher.get_logger().info('robot end right')
-            case 's':
-                publisher.rvr_stop_roll()
-                publisher.get_logger().info('robot stop')
-            case _:
-                publisher.get_logger().warn('unknown command to control_event')
+        speed, heading = control_str.split(',')
+        
+        publisher.rvr_change_heading(heading)
+        publisher.rvr_send_speed(speed)
 
     return 'OK'
 
