@@ -9,6 +9,6 @@ services:
         privileged: true
         ports:
           - '8080:8080'
-        command: python3 sphero-sdk/sphero-sdk-raspberry-python/getting-started/observer/leds/set-all-leds.py && ros2 launch rvr_bringup portal_and_server.launch.py
+        command: python3 sphero-sdk/sphero-sdk-raspberry-python/getting-started/observer/leds/set_all_leds.py && ros2 launch rvr_bringup portal_and_server.launch.py
         volumes:
           - /dev:/dev
