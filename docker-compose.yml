@@ -9,6 +9,6 @@ services:
         privileged: true
         ports:
           - '8080:8080'
-        command: . /apps/scripts/container/docker_compose_start_robot.sh
+        command: /apps/scripts/container/docker_compose_start_robot.sh
         volumes:
           - /dev:/dev
