@@ -1,6 +1,6 @@
-from sphero_sdk.sphero_sdk_raspberry_python.sphero_sdk import SpheroRvrObserver
+from sphero_sdk import SpheroRvrObserver
 
-from . import SpheroRvrInterface
+from .sphero_rvr_interface import SpheroRvrInterface
 
 debug = False
 delay = 250

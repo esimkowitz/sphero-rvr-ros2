@@ -11,11 +11,11 @@ ros2_ws/src/install/
 ros2_ws/src/log/
 
 # Sphero SDK
-sphero_sdk/sphero_sdk_raspberry_pi/docs/
-sphero_sdk/sphero_sdk_raspberry_pi/getting_started/
-sphero_sdk/sphero_sdk_raspberry_pi/projects/
-!sphero_sdk/sphero_sdk_raspberry_pi/getting_started/observer/leds/set_all_leds.py
-sphero_sdk/sphero_sdk_raspberry_pi/tools/
+*/sphero_sdk/sphero_sdk_raspberry_pi/docs/
+*/sphero_sdk/sphero_sdk_raspberry_pi/getting_started/
+*/sphero_sdk/sphero_sdk_raspberry_pi/projects/
+!*/sphero_sdk/sphero_sdk_raspberry_pi/getting_started/observer/leds/set_all_leds.py
+*/sphero_sdk/sphero_sdk_raspberry_pi/tools/
 
 *.gitignore
 *.gitmodules
