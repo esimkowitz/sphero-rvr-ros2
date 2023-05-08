@@ -1,37 +1,31 @@
-import os
-import sys
 import time
-sys.path.append(os.path.abspath('/app/sphero-sdk/sphero-sdk-raspberry-python')) 
+import os
 
-import asyncio
 from stopwatch import Stopwatch
-from sphero_sdk import SpheroRvrAsync
-from sphero_sdk import RvrLedGroups
-from sphero_sdk import SerialAsyncDal
 import rclpy
 from rclpy.node import Node
+from rclpy.action import ActionServer
 import std_msgs.msg
 
-debug = False
-delay = 250
-size = 31 
-
-# sensor variable initialization
-imu_global = {}
-color_global = {}
-accelerometer_global = {}
-ambient_global = {}
-encoder_global = {}
-
-received = 0x00     # received byte - fully received at 0x1f
+from rvr_interfaces.action import ChangeHeading
+from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, SpheroRvrClient, SpheroRvrMock
 
 class RvrNode(Node):
 
-    def __init__(self, rvr :SpheroRvrAsync, loop :asyncio.AbstractEventLoop) -> None:
+    def __init__(self, rvr: SpheroRvrInterface) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
+        self.heading = 0.0
+
         self.rvr = rvr
-        self.loop = loop
+        
+        self.get_logger().info('Rvr client is created, waking')
+        self.rvr.wake()
+        time.sleep(1)
+        self.get_logger().info('Rvr is awake')
+
+        self.rvr.on_will_sleep_notify(self.keep_alive, None)
+
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
             'rvr_sensors',  # publish to chatter channel
@@ -42,7 +36,7 @@ class RvrNode(Node):
             self.set_leds,
             10)
         self.start_roll_sub = self.create_subscription(
-            std_msgs.msg.Float32MultiArray,
+            std_msgs.msg.Float32,
             'rvr_start_roll',   
             self.start_roll,
             10)
@@ -51,36 +45,25 @@ class RvrNode(Node):
             'rvr_stop_roll',
             self.stop_roll,
             10)
-        self.roll_straight_sub = self.create_subscription(
-            std_msgs.msg.Float32,
-            'rvr_roll_straight',
-            self.roll_straight,
-            10)
-        self.set_heading_sub = self.create_subscription(
-            std_msgs.msg.Float32,
-            'rvr_set_heading',
-            self.set_heading,
-            10)
-        self.adjust_heading_sub = self.create_subscription(
-            std_msgs.msg.Float32,
-            'rvr_adjust_heading',
-            self.adjust_heading,
-            10)
-        self.reset_heading_sub = self.create_subscription(
-            std_msgs.msg.Empty,
-            'rvr_reset_heading',
-            self.reset_heading,
-            10)
-        
+        self._action_server = ActionServer(
+            self,
+            ChangeHeading,
+            'change_heading',
+            self.change_heading)
+
         self.get_logger().info('RvrNode init finished')
+
+    def close(self):
+        self.rvr.close()
+
+    def keep_alive(self):
+        self.rvr.wake()
 
     def start_roll(self, msg):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('start_roll: "%s"' % msg.data)
-        speed = int(msg.data[0])
-        heading = int(msg.data[1])
-        self.set_heading_local(heading)
+        speed = int(msg.data)
         self.roll_start_helper(speed)
         self.get_logger().info('start_roll end %5.4f' % stopwatch.duration)
 
@@ -88,112 +71,63 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('stop_roll')
-        self.loop.run_until_complete(
-            self.rvr.drive_control.roll_stop(
-                heading=self.heading
-            )
+        self.rvr.stop_roll(
+            heading=self.heading
         )
+        
         self.get_logger().info('stop_roll end %5.4f' % stopwatch.duration)
 
-    def roll_straight(self, msg):
-        stopwatch = Stopwatch(3)
-        stopwatch.start()
-        self.get_logger().info('roll_straight: "%s"' % msg.data)
-        speed = int(msg.data)
-        self.roll_start_helper(speed)
-        self.get_logger().info('roll_straight end %5.4f' % stopwatch.duration)
-
     def roll_start_helper(self, speed):
-        self.loop.run_until_complete(
-            self.rvr.drive_control.roll_start(
-                speed=speed,
-                heading=self.heading
-            )
+        self.rvr.start_roll(
+            speed=speed,
+            heading=self.heading
         )
 
-    def set_heading_local(self, heading):
-        self.heading = int(heading) % 360
+    def set_heading_local(self, new_heading):
+        retval = abs(self.heading - new_heading)
+        self.heading = int(new_heading) % 360
+        return retval
     
     def set_heading_helper(self):
-        self.loop.run_until_complete(
-            self.rvr.drive_control.set_heading(
-                heading=self.heading
-            )
+        self.rvr.set_heading(
+            heading=self.heading
         )
 
-    def adjust_heading(self, msg):
+    def change_heading(self, goal_handle):
         stopwatch = Stopwatch(3)
         stopwatch.start()
-        self.get_logger().info('adjust_heading: "%s"' % msg.data)
-        heading_delta = int(msg.data)
-        self.set_heading_local(self.heading + heading_delta)
+        theta = goal_handle.request.theta
+        self.get_logger().info('change_heading_start, theta: "%s"' % theta)
+        result = ChangeHeading.Result()
+        result.delta = self.set_heading_local(theta)
         self.set_heading_helper()
         self.get_logger().info('adjust_heading end %5.4f' % stopwatch.duration)
-
-    def set_heading(self, msg):
-        stopwatch = Stopwatch(3)
-        stopwatch.start()
-        self.get_logger().info('set_heading: "%s"' % msg.data)
-        heading = int(msg.data)
-        self.set_heading_local(heading)
-        self.set_heading_helper()
-        self.get_logger().info('set_heading end %5.4f' % stopwatch.duration)
-    
-    def reset_heading(self, msg=None):
-        stopwatch = Stopwatch(3)
-        stopwatch.start()
-        self.get_logger().info('reset_heading')
-        self.set_heading_local(0.0)
-        self.loop.run_until_complete(
-            self.rvr.drive_control.reset_heading()
-        )
-        self.get_logger().info('reset_heading end %5.4f' % stopwatch.duration)
+        return result
 
     def set_leds(self, msg):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('set_leds: "%s"' % msg.data)
-        led_data = msg.data
-        R = int(led_data[0])
-        G = int(led_data[1])
-        B = int(led_data[2])
-        self.loop.run_until_complete(
-            self.rvr.set_all_leds(
-                led_group=RvrLedGroups.all_lights.value,
-                led_brightness_values=[color for x in range(10) for color in [R, G, B]]
-            )
-        )
         self.get_logger().info('set_leds end %5.4f' % stopwatch.duration)
 
 def main(args=None):
-    """ This program demonstrates how to enable multiple sensors to stream."""
-    loop = asyncio.get_event_loop()
-    rvr = SpheroRvrAsync(
-        dal=SerialAsyncDal(
-            loop
-        )
-    )
-
-    loop.run_until_complete(rvr.wake())
-
     rclpy.init(args=args)
 
-    # Give RVR time to wake up
-    loop.run_until_complete(asyncio.sleep(2))
+    rvr_client = SpheroRvrMock() if os.getenv("MOCK_RVR").lower() == 'true' else SpheroRvrClient()
 
-    rvr_node = RvrNode(rvr, loop)
+    rvr_node = RvrNode(rvr_client)
 
     rvr_node.get_logger().info('RvrNode initialized')
         
     # Reset the robot's heading to 0.0
-    rvr_node.reset_heading()
+    rvr_node.set_heading_local(0.0)
+    rvr_node.set_heading_helper()
 
     rvr_node.get_logger().info('Rvr heading reset')
 
     rclpy.spin(rvr_node)
 
-    rvr.sensor_control.clear(),
-    rvr.close()
+    rvr_node.close()
 
     rclpy.shutdown()
 

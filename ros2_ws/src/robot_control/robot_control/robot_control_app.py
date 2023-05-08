@@ -9,7 +9,10 @@ import signal
 
 import rclpy
 from rclpy.node import Node
+from rclpy.action import ActionClient
 import std_msgs.msg
+
+from rvr_interfaces.action import ChangeHeading
 
 app = Flask(__name__, template_folder='/app/ros2_ws/src/robot_control/robot_control/templates', static_folder='/app/ros2_ws/src/robot_control/robot_control/static')
 app.config['SECRET_KEY'] = 'secret!'
@@ -22,50 +25,27 @@ class RobotControlPublisher(Node):
     def __init__(self):
         super().__init__('robot_control_node')
         self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
-        self.publish_rvr_roll_straight = self.create_publisher(std_msgs.msg.Float32, 'rvr_roll_straight', 10)
+        self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_start_roll', 10)
         self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10)
-        self.publish_rvr_adjust_heading = self.create_publisher(std_msgs.msg.Float32, 'rvr_adjust_heading', 10)
-        self.publish_rvr_set_heading = self.create_publisher(std_msgs.msg.Float32, 'rvr_set_heading', 10)
-        self.publish_rvr_reset_heading = self.create_publisher(std_msgs.msg.Empty, 'rvr_reset_heading', 10)
+        self.change_heading_client = ActionClient(self, ChangeHeading, 'change_heading')
 
     def rvr_change_leds(self, data):
         msg = std_msgs.msg.Float32MultiArray()
         msg.data = data
         self.publish_rvr_change_leds.publish(msg)
 
-    def rvr_start_roll_forward(self):
+    def rvr_send_speed(self, speed):
         msg = std_msgs.msg.Float32()
-        msg.data = 30.0
-        self.publish_rvr_roll_straight.publish(msg)
+        msg.data = speed
+        self.publish_rvr_start_roll.publish(msg)
 
-    def rvr_start_roll_reverse(self):
-        msg = std_msgs.msg.Float32()
-        msg.data = -30.0
-        self.publish_rvr_roll_straight.publish(msg)
+    def rvr_change_heading(self, heading_theta):
+        goal_msg = ChangeHeading.Goal()
+        goal_msg.theta = heading_theta
 
-    def rvr_stop_roll(self):
-        msg = std_msgs.msg.Empty()
-        self.publish_rvr_stop_roll.publish(msg)
+        self.change_heading_client.wait_for_server()
 
-    def rvr_adjust_heading(self, heading_delta):
-        msg = std_msgs.msg.Float32()
-        msg.data = heading_delta
-        self.publish_rvr_adjust_heading.publish(msg)
-
-    def rvr_set_heading(self, heading):
-        msg = std_msgs.msg.Float32()
-        msg.data = heading % 360.0
-        self.publish_rvr_set_heading.publish(msg)
-
-    def rvr_turn_left(self):
-        self.rvr_adjust_heading(-30.0)
-
-    def rvr_turn_right(self):
-        self.rvr_adjust_heading(30.0)
-
-    def rvr_reset_heading(self):
-        msg = std_msgs.msg.Empty()
-        self.publish_rvr_reset_heading.publish(msg)
+        return self.change_heading_client.send_goal_async(goal_msg)
 
 rclpy.init(args=None)
 publisher = RobotControlPublisher()
@@ -77,26 +57,12 @@ def index():
 @app.route('/control_event', methods=['POST'])
 def control_event():
     if request.method == 'POST':
-        control = request.form['control']
+        control_str = request.form['control']
 
-        match control:
-            case 'f': 
-                publisher.rvr_start_roll_forward()
-                publisher.get_logger().info('robot forward')
-            case 'b':
-                publisher.rvr_start_roll_reverse()
-                publisher.get_logger().info('robot backward')
-            case 'l':
-                publisher.rvr_turn_left()
-                publisher.get_logger().info('robot left')
-            case 'r':
-                publisher.rvr_turn_right()
-                publisher.get_logger().info('robot right')
-            case 's':
-                publisher.rvr_stop_roll()
-                publisher.get_logger().info('robot stop')
-            case _:
-                publisher.get_logger().warn('unknown command to control_event')
+        speed, heading = control_str.split(',')
+        
+        publisher.rvr_change_heading(float(round(float(heading))))
+        publisher.rvr_send_speed(float(round(float(speed))))
 
     return 'OK'
 

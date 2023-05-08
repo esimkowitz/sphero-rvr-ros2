@@ -7,7 +7,10 @@
   <maintainer email="esimkowitz@wustl.edu">Evan Simkowitz</maintainer>
   <license>MIT</license>
 
+  <exec_depend>rclpy</exec_depend>
   <depend>python3-flask</depend>
+  <depend>rvr_interfaces</depend>
+
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

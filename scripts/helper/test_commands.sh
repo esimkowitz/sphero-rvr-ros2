@@ -1,3 +1,5 @@
+#!/bin/sh
+
 ros2 topic pub /rvr_change_leds std_msgs/Float32MultiArray "layout:
   dim: []
   data_offset: 0

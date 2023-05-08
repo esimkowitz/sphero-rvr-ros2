@@ -1,6 +1,6 @@
 # Containerized RO2 Node for Sphero RVR
 
-Pyhton3 based [ROS2](https://docs.ros.org/en/humble/#) node for interacting with [Sphero RVR](https://www.sphero.com/rvr).
+Pyhton 3 [ROS2](https://docs.ros.org/en/humble/#) node for interacting with [Sphero RVR](https://www.sphero.com/rvr).
 
 Runs in Docker for easy integration and streamlined dependency management.
 
@@ -30,15 +30,16 @@ I have noticed that the exec shell will exit whenever there is a nonzero exit co
 
 ## Running via Docker Compose
 
-I've added a [docker-compose.yml](docker-compose.yml) file to run the ROS2 node in the background. 
+I've added a [docker-compose.yml](docker-compose.yml) file to run the ROS2 node in the background.
 
-### Run and build via script
+### Run via script
 
-I've added a shell script that can build the image before starting the Docker Compose for easier development: [run_docker_compose_build.sh](run_docker_compose_build.sh).
+I've added a shell script to start the Docker Compose services with the necssary variables: [run_docker_compose.sh](scripts/helper/run_docker_compose.sh).
 
-### Run using pre-built image
+The script specifies two optional flags:
 
-You can run it using a pre-built image with the following script: [run_docker_compose.sh](run_docker_compose.sh)
+- `-b`: Specifies whether to build the container image from source. By default, the script will use the version from Docker Hub.
+- `-m`: Specifies whether to mock the RVR interface, which is useful when testing functionality off of the Raspberry Pi, such as on your development computer. By default, the interface is not mocked.
 
 ## Control using the robot_control webpage
 
@@ -53,10 +54,10 @@ You can publish commands by opening a Bash shell on the container running in Doc
 To start the Bash shell, run the following command:
 
 ```Bash
-sudo docker compose exec rvr_server bash
+docker compose exec rvr_server bash
 ```
 
-Then, you can use the commands in the [test_commands.sh](test_commands.sh) file to publish commands to the running node.
+Then, you can use the commands in the [test_commands.sh](scripts/helper/test_commands.sh) file to publish commands to the running node.
 
 ## Credit
 
@@ -66,4 +67,4 @@ Thank you [@gumstix/Altium](https://github.com/gumstix) for your [RVR ROS2 Node 
 
 ## License
 
-MIT &copy; Evan Simkowitz, 2022, see [LICENSE](LICENSE.md) for additional licenses.
+MIT &copy; Evan Simkowitz, 2023, see [LICENSE](LICENSE.md) for additional licenses.
