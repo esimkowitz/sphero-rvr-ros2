@@ -7,7 +7,9 @@ from rclpy.action import ActionServer
 import std_msgs.msg
 
 from rvr_interfaces.action import ChangeHeading
-from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, SpheroRvrClient, SpheroRvrMock, should_mock_rvr
+from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, initialize_rvr_sdk, initialize_rvr_interface
+
+rvr = initialize_rvr_sdk()
 
 class RvrNode(Node):
 
@@ -112,7 +114,7 @@ class RvrNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    rvr_client = SpheroRvrMock() if should_mock_rvr() else SpheroRvrClient()
+    rvr_client = initialize_rvr_interface(rvr)
 
     rvr_node = RvrNode(rvr_client)
 
