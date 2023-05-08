@@ -1,5 +1,4 @@
 import time
-import os
 
 from stopwatch import Stopwatch
 import rclpy
