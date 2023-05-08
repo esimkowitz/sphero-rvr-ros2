@@ -24,7 +24,7 @@ class RvrNode(Node):
         time.sleep(1)
         self.get_logger().info('Rvr is awake')
 
-        self.rvr.on_will_sleep_notify(self.keep_alive)
+        self.rvr.on_will_sleep_notify(self.keep_alive, None)
 
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
@@ -113,7 +113,7 @@ class RvrNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    rvr_client = SpheroRvrMock() if bool(os.getenv("MOCK_RVR")) else SpheroRvrClient()
+    rvr_client = SpheroRvrMock() if os.getenv("MOCK_RVR").lower() == 'true' else SpheroRvrClient()
 
     rvr_node = RvrNode(rvr_client)
 

@@ -1,30 +1,30 @@
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
-class SpheroRvrInterface(ABC):
+class SpheroRvrInterface(ABCMeta):
     @abstractmethod
     def wake(self) -> None:
         """Wake the RVR from sleep."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def close(self) -> None:
         """Close the connection to the RVR and put it to sleep"""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def on_will_sleep_notify(self, handler, timeout: float) -> None:
         """Run an action 10s before the RVR sleeps."""
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def start_roll(self, speed: float, heading: float) -> None:
         """Start roll at a specified speed and heading."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def stop_roll(self, heading: float) -> None:
         """Stop roll."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def set_heading(self, heading: float) -> None:
