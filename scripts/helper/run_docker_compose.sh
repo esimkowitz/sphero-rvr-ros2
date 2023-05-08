@@ -10,8 +10,9 @@ popd () {
 }
 # end pushd/popd aliases
 
-# By default, we do not want to mock the RVR interface
+# By default, we do not want to mock the RVR interface or build the container image
 mock_rvr_val="false"
+shouldbuild=false
 
 # Start process option flags if present
 while getopts "bm" flag
