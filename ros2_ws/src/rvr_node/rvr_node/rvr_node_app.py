@@ -7,25 +7,23 @@ from rclpy.action import ActionServer
 import std_msgs.msg
 
 from rvr_interfaces.action import ChangeHeading
-from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, initialize_rvr_sdk, initialize_rvr_interface
+from sphero_sdk_wrapper.sphero_rvr_interface import initialize_rvr_interface
 
-rvr = initialize_rvr_sdk()
+rvr = initialize_rvr_interface()
 
 class RvrNode(Node):
 
-    def __init__(self, rvr: SpheroRvrInterface) -> None:
+    def __init__(self) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
         self.heading = 0.0
-
-        self.rvr = rvr
         
         self.get_logger().info('Rvr client is created, waking')
-        self.rvr.wake()
+        rvr.wake()
         time.sleep(1)
         self.get_logger().info('Rvr is awake')
 
-        self.rvr.on_will_sleep_notify(self.keep_alive, None)
+        rvr.on_will_sleep_notify(self.keep_alive, None)
 
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
@@ -55,10 +53,10 @@ class RvrNode(Node):
         self.get_logger().info('RvrNode init finished')
 
     def close(self):
-        self.rvr.close()
+        rvr.close()
 
     def keep_alive(self):
-        self.rvr.wake()
+        rvr.wake()
 
     def start_roll(self, msg):
         stopwatch = Stopwatch(3)
@@ -72,14 +70,14 @@ class RvrNode(Node):
         stopwatch = Stopwatch(3)
         stopwatch.start()
         self.get_logger().info('stop_roll')
-        self.rvr.stop_roll(
+        rvr.stop_roll(
             heading=self.heading
         )
         
         self.get_logger().info('stop_roll end %5.4f' % stopwatch.duration)
 
     def roll_start_helper(self, speed):
-        self.rvr.start_roll(
+        rvr.start_roll(
             speed=speed,
             heading=self.heading
         )
@@ -90,7 +88,7 @@ class RvrNode(Node):
         return retval
     
     def set_heading_helper(self):
-        self.rvr.set_heading(
+        rvr.set_heading(
             heading=self.heading
         )
 
@@ -114,9 +112,7 @@ class RvrNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    rvr_client = initialize_rvr_interface(rvr)
-
-    rvr_node = RvrNode(rvr_client)
+    rvr_node = RvrNode()
 
     rvr_node.get_logger().info('RvrNode initialized')
         
