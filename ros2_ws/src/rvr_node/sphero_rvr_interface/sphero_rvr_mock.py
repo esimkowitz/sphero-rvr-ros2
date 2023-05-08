@@ -1,4 +1,4 @@
-from .sphero_rvr_interface import SpheroRvrInterface
+from . import SpheroRvrInterface
 
 class SpheroRvrMock(metaclass=SpheroRvrInterface):
     def wake(self) -> None:

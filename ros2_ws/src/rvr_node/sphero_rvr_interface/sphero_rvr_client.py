@@ -1,6 +1,6 @@
 from sphero_sdk import SpheroRvrObserver
 
-from .sphero_rvr_interface import SpheroRvrInterface
+from . import SpheroRvrInterface
 
 debug = False
 delay = 250

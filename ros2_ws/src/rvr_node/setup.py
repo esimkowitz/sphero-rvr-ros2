@@ -1,4 +1,6 @@
 from setuptools import setup
+from glob import glob
+import os
 
 package_name = 'rvr_node'
 
@@ -8,8 +10,11 @@ setup(
     packages=[package_name],
     data_files=[
         ('share/ament_index/resource_index/packages',
-            ['resource/' + package_name]),
-        ('share/' + package_name, ['package.xml']),
+            [os.path.join('resource', package_name)]),
+        (os.path.join('share', package_name), ['package.xml']),
+        (os.path.join('lib', 'python3.10', 'site-packages', 'sphero_sdk'), glob('sphero_sdk_raspberry_python/sphero_sdk/**/*.py', recursive=True)),
+        (os.path.join('lib', 'python3.10', 'site-packages', 'sphero_rvr_interface'), glob('sphero_rvr_interface/**/*.py', recursive=True))
+
     ],
     install_requires=['setuptools'],
     zip_safe=True,

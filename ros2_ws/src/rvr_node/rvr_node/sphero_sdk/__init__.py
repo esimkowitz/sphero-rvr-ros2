@@ -1,2 +1,0 @@
-from .sphero_rvr_interface import sphero_rvr_interface
-from .sphero_sdk_raspberry_python.sphero_sdk import SpheroRvrObserver

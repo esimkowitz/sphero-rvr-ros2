@@ -1,3 +1,3 @@
 [submodule "sphero_sdk/sphero_sdk_raspberry_python"]
-	path = ros2_ws/src/rvr_node/rvr_node/sphero_sdk/sphero_sdk_raspberry_python
+	path = ros2_ws/src/rvr_node/sphero_sdk_raspberry_python
 	url = https://github.com/sphero-inc/sphero-sdk-raspberrypi-python.git

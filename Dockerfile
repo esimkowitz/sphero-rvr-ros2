@@ -8,7 +8,7 @@ RUN rm /ros_entrypoint.sh && \
 
 FROM base AS build
 COPY ./ros2_ws /app/ros2_ws
-WORKDIR /app/ros2_ws/src/rvr_node/rvr_node/sphero_sdk/sphero_sdk_raspberry_python
+WORKDIR /app/ros2_ws/src/rvr_node/sphero_sdk_raspberry_python/sp
 RUN . ../sphero-sdk-first-time-setup.sh
 WORKDIR /app/ros2_ws
 RUN python3 -m pip install -r ./src/rvr_node/requirements.txt && \
