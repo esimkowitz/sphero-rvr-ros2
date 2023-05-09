@@ -11,6 +11,6 @@ services:
           - '8080:8080'
         command: ros2 launch rvr_bringup portal_and_server.launch.py
         environment:
-          - MOCK_RVR=${MOCK_RVR}
+          - MOCK_RVR=${MOCK_RVR:-false}
         volumes:
           - /dev:/dev

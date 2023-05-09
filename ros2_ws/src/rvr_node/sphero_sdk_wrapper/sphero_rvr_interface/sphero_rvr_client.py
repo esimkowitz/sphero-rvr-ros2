@@ -1,6 +1,7 @@
 from sphero_sdk_wrapper.sphero_sdk_raspberry_python.sphero_sdk import SpheroRvrObserver
 
-from . import SpheroRvrInterface
+from .sphero_rvr_interface import SpheroRvrInterface
+from .utilities import should_mock_rvr
 
 debug = False
 delay = 250
@@ -16,8 +17,8 @@ encoder_global = {}
 received = 0x00     # received byte - fully received at 0x1f
 
 class SpheroRvrClient(metaclass=SpheroRvrInterface):
-    def __init__(self) -> None:
-        self.rvr = SpheroRvrObserver()
+    def __init__(self, rvr: SpheroRvrObserver) -> None:
+        self.rvr = rvr
 
     def wake(self) -> None:
         """Wake the RVR from sleep."""
@@ -50,6 +51,3 @@ class SpheroRvrClient(metaclass=SpheroRvrInterface):
         self.rvr.drive_control.set_heading(
             heading=heading
         )
-    
-
-
