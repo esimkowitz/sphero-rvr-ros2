@@ -1,11 +1,14 @@
 import time
 
+# import ros2 packages
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
 import std_msgs.msg
 
 from rvr_interfaces.action import ChangeHeading
+
+# import sphero sdk packages
 from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, initialize_rvr_interface, initialize_rvr_sdk
 
 rvr_sdk = initialize_rvr_sdk()

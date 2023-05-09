@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
+import os
+import signal
+
+# Impport flask and socketio packages
 import eventlet
 eventlet.monkey_patch()
 from threading import Thread
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, Namespace
 
-import os
-import signal
 
+# import ros2 packages
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
@@ -123,6 +126,7 @@ def main():
     signal.signal(signal.SIGHUP, end_process)
     signal.signal(signal.SIGQUIT, end_process)
 
+    # start the server
     publisher.server_start()
 
 if __name__ == '__main__':
