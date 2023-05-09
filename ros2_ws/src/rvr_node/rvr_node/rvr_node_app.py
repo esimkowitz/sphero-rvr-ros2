@@ -71,23 +71,23 @@ class RvrNode(Node):
         if self.event_to_process:
             self.get_logger().info('Event to process')
             self.event_to_process = False
-            if self.speed > 0:
+            if self.speed != 0:
+                self.get_logger().info(f'start_roll: speed "{self.speed}", heading "{self.heading}"')
                 self.rvr.start_roll(
                     speed=self.speed,
                     heading=self.heading
                 )
             else:
+                self.get_logger().info(f'stop_roll: heading "{self.heading}"')
                 self.rvr.stop_roll(
                     heading=self.heading
                 )
 
     def start_roll(self, msg):
-        self.get_logger().info('start_roll: "%s"' % msg.data)
         self.speed = int(msg.data)
         self.event_to_process = True
 
     def stop_roll(self, msg=None):
-        self.get_logger().info('stop_roll')
         self.speed = 0
         self.event_to_process = True
 
@@ -99,13 +99,13 @@ class RvrNode(Node):
 
     def change_heading(self, goal_handle):
         theta = goal_handle.request.theta
-        self.get_logger().info('change_heading_start, theta: "%s"' % theta)
+        self.get_logger().info(f'change_heading_start, theta: "{theta}"')
         result = ChangeHeading.Result()
         result.delta = self.set_heading_local(theta)
         return result
 
     def set_leds(self, msg):
-        self.get_logger().info('set_leds: "%s"' % msg.data)
+        self.get_logger().info(f'set_leds: "{msg.data}"')
 
 def main(args=None):
     rclpy.init(args=args)
