@@ -84,7 +84,7 @@ class RvrNode(Node):
                 )
 
     def start_roll(self, msg):
-        self.speed = int(msg.data)
+        self.speed = int(round(msg.data))
         self.event_to_process = True
 
     def stop_roll(self, msg=None):
@@ -101,7 +101,7 @@ class RvrNode(Node):
         theta = goal_handle.request.theta
         self.get_logger().info(f'change_heading_start, theta: "{theta}"')
         result = ChangeHeading.Result()
-        result.delta = self.set_heading_local(theta)
+        result.delta = self.set_heading_local(round(theta))
         return result
 
     def set_leds(self, msg):
