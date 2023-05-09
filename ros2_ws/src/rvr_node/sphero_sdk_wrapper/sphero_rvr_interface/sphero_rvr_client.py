@@ -33,20 +33,20 @@ class SpheroRvrClient(metaclass=SpheroRvrInterface):
         """Run an action 10s before the RVR sleeps."""
         self.rvr.on_will_sleep_notify(handler=handler, timeout=timeout)
     
-    def start_roll(self, speed: float, heading: float) -> None:
+    def start_roll(self, speed: int, heading: int) -> None:
         """Start roll at a specified speed and heading."""
         self.rvr.drive_control.roll_start(
             speed=speed,
             heading=heading
         )
 
-    def stop_roll(self, heading: float) -> None:
+    def stop_roll(self, heading: int) -> None:
         """Stop roll."""
         self.rvr.drive_control.roll_stop(
             heading=heading
         )
 
-    def set_heading(self, heading: float) -> None:
+    def set_heading(self, heading: int) -> None:
         """Set heading."""
         self.rvr.drive_control.set_heading(
             heading=heading

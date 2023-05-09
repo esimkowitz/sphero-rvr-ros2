@@ -17,16 +17,16 @@ class SpheroRvrInterface(ABCMeta):
         raise NotImplementedError
     
     @abstractmethod
-    def start_roll(self, speed: float, heading: float) -> None:
+    def start_roll(self, speed: int, heading: int) -> None:
         """Start roll at a specified speed and heading."""
         raise NotImplementedError
 
     @abstractmethod
-    def stop_roll(self, heading: float) -> None:
+    def stop_roll(self, heading: int) -> None:
         """Stop roll."""
         raise NotImplementedError
 
     @abstractmethod
-    def set_heading(self, heading: float) -> None:
+    def set_heading(self, heading: int) -> None:
         """Set heading."""
         pass
