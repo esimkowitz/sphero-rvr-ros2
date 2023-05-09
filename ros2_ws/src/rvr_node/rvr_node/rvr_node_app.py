@@ -93,7 +93,7 @@ class RvrNode(Node):
 
     def set_heading_local(self, new_heading):
         retval = abs(self.heading - new_heading)
-        self.heading = int(new_heading) % 360
+        self.heading = int(round(new_heading)) % 360
         self.event_to_process = True
         return retval
 
@@ -101,7 +101,7 @@ class RvrNode(Node):
         theta = goal_handle.request.theta
         self.get_logger().info(f'change_heading_start, theta: "{theta}"')
         result = ChangeHeading.Result()
-        result.delta = self.set_heading_local(round(theta))
+        result.delta = self.set_heading_local(theta)
         return result
 
     def set_leds(self, msg):
