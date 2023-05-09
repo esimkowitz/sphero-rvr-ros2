@@ -1,0 +1,2 @@
+include robot_control/templates/*
+include robot_control/static/**/*

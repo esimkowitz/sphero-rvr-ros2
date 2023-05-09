@@ -12,7 +12,7 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages',
             [os.path.join('resource', package_name)]),
-        (os.path.join('share', package_name), ['package.xml']),
+        ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['setuptools'] + [
         'aiohttp == 3.7.4',
