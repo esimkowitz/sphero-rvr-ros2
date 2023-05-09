@@ -100,15 +100,6 @@ def control_event(message):
     node.rvr_change_heading(float(heading))
     node.rvr_send_speed(float(speed))
 
-@node.socketio.on('disconnect_request', namespace='/robot_control')
-def disconnect_request():
-    @copy_current_request_context
-    def can_disconnect():
-        disconnect()
-    emit('my_response',
-         {'data': 'Disconnected!'},
-         callback=can_disconnect)
-
 def main():
     def end_process(signum=None):
         # Called on process termination.
