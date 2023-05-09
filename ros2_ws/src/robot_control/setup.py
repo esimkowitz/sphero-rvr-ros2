@@ -1,5 +1,7 @@
 from setuptools import setup
 
+import os
+
 package_name = 'robot_control'
 
 setup(
@@ -8,10 +10,15 @@ setup(
     packages=[package_name],
     data_files=[
         ('share/ament_index/resource_index/packages',
-            ['resource/' + package_name]),
-        ('share/' + package_name, ['package.xml']),
+            [os.path.join('resource', package_name)]),
+        ('share/' + package_name, 
+            ['package.xml']),
     ],
-    install_requires=['Flask>=0.12.2'],
+    include_package_data=True,
+    install_requires=[
+        'Flask>=5.0.0',
+        'Flask-SocketIO>=5.0.0',
+        "eventlet>=0.33.0"],
     zip_safe=True,
     maintainer='Evan Simkowitz',
     maintainer_email='esimkowitz@wustl.edu',
