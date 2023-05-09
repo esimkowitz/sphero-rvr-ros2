@@ -14,6 +14,7 @@ RUN sed -i '/input()/d' cms_fw_check_base.py
 # End remove blocking input()
 WORKDIR /app/ros2_ws
 RUN python3 -m pip install -r ./src/rvr_node/requirements.txt && \
+    python3 -m pip install -r ./src/robot_control/requirements.txt && \
     source /opt/ros/humble/setup.bash && \
     rosdep update && rosdep install --from-paths src -y --ignore-src && \
     colcon build

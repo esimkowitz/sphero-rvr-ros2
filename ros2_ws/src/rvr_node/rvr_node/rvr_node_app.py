@@ -15,8 +15,8 @@ class RvrNode(Node):
     def __init__(self, rvr_client: SpheroRvrInterface) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
-        self.heading = 0.0
-        self.speed = 0.0
+        self.heading = 0
+        self.speed = 0
         self.event_to_process = True
 
         self.rvr = rvr_client
@@ -68,14 +68,14 @@ class RvrNode(Node):
         if self.event_to_process:
             self.get_logger().info('Event to process')
             self.event_to_process = False
-            if self.speed > 0.0:
+            if self.speed > 0:
                 self.rvr.start_roll(
-                    speed=int(self.speed),
-                    heading=int(self.heading)
+                    speed=self.speed,
+                    heading=self.heading
                 )
             else:
                 self.rvr.stop_roll(
-                    heading=int(self.heading)
+                    heading=self.heading
                 )
 
     def start_roll(self, msg):
@@ -95,7 +95,7 @@ class RvrNode(Node):
         return retval
 
     def change_heading(self, goal_handle):
-        theta = goal_handle.request.theta
+        theta = int(goal_handle.request.theta)
         self.get_logger().info('change_heading_start, theta: "%s"' % theta)
         result = ChangeHeading.Result()
         result.delta = self.set_heading_local(theta)

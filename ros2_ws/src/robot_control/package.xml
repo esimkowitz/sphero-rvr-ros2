@@ -9,6 +9,7 @@
 
   <exec_depend>rclpy</exec_depend>
   <depend>python3-flask</depend>
+  <depend>python3-flask-socketio</depend>
   <depend>rvr_interfaces</depend>
 
   <test_depend>ament_copyright</test_depend>
