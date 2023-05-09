@@ -8,5 +8,5 @@ from .utilities import should_mock_rvr
 def initialize_rvr_sdk() -> SpheroRvrObserver:
     return None if should_mock_rvr() else SpheroRvrObserver()
 
-def initialize_rvr_interface() -> SpheroRvrInterface:
-    return SpheroRvrMock() if should_mock_rvr() else SpheroRvrClient(SpheroRvrObserver())
+def initialize_rvr_interface(rvr: SpheroRvrObserver) -> SpheroRvrInterface:
+    return SpheroRvrMock() if should_mock_rvr() else SpheroRvrClient(rvr)

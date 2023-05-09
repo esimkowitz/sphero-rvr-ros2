@@ -7,18 +7,18 @@ from rclpy.action import ActionServer
 import std_msgs.msg
 
 from rvr_interfaces.action import ChangeHeading
-from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, initialize_rvr_interface
+from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, initialize_rvr_interface, initialize_rvr_sdk
 
-rvr = initialize_rvr_interface()
+rvr_sdk = initialize_rvr_sdk()
 
 class RvrNode(Node):
 
-    def __init__(self) -> None:
+    def __init__(self, rvr_client: SpheroRvrInterface) -> None:
         super().__init__('rvr_node')
         self.get_logger().info('RvrNode init started')
         self.heading = 0.0
 
-        self.rvr = initialize_rvr_interface()
+        self.rvr = rvr_client
         
         self.get_logger().info('Rvr client is created, waking')
         self.rvr.wake()
@@ -114,21 +114,22 @@ class RvrNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    rvr_node = RvrNode()
+    rvr_node = RvrNode(initialize_rvr_interface(rvr_sdk))
 
-    rvr_node.get_logger().info('RvrNode initialized')
-        
-    # Reset the robot's heading to 0.0
-    rvr_node.set_heading_local(0.0)
-    rvr_node.set_heading_helper()
+    try:
+        rvr_node.get_logger().info('RvrNode initialized')
+            
+        # Reset the robot's heading to 0.0
+        rvr_node.set_heading_local(0.0)
+        rvr_node.set_heading_helper()
 
-    rvr_node.get_logger().info('Rvr heading reset')
+        rvr_node.get_logger().info('Rvr heading reset')
 
-    rclpy.spin(rvr_node)
+        rclpy.spin(rvr_node)
+    finally:
+        rvr_node.close()
 
-    rvr_node.close()
-
-    rclpy.shutdown()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
