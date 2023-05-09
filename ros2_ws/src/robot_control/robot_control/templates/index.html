@@ -66,7 +66,13 @@
     }
 
     function incrementHeading(increment) {
-      heading = Math.abs(heading + increment) % 360;
+      var new_heading = (heading + increment) % 360;
+
+      while (new_heading > 0) {
+        new_heading += 360;
+      }
+
+      heading = new_heading;
     }
 
     function forward() {
