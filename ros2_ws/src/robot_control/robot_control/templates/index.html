@@ -37,22 +37,28 @@
   <body>
     <h1>Robot Controls</h1>
     <div id="control_area">
+      <div>Heading: <span id="heading"></span></div>
+      <div>Speed: <span id="speed"></span></div>
       <div class="zone joystick active" id="joystick"></div>
     </div>
   </body>
   <script type="text/javascript" charset="utf-8">
-    namespace = '/robot_control';
+    var namespace = "/robot_control";
     var socket = io(namespace);
 
     var heading = 0.0;
     var speed = 0.0;
 
     function sendDataOnSocket(data) {
-      socket.emit('control_event', data);
+      socket.emit("control_event", data);
     }
 
     function send_control() {
+      document.getElementById("heading").innerHTML = heading;
+      document.getElementById("speed").innerHTML = speed;
+
       var message = speed + "," + heading;
+
       sendDataOnSocket({
         control: message,
       });
@@ -88,32 +94,50 @@
     }
 
     document.addEventListener("keydown", function (event) {
-      if (event.which === 87 || event.which === 38) {
-        forward();
-      } else if (event.which === 68 || event.which === 39) {
-        right();
-      } else if (event.which === 83 || event.which === 40) {
-        backward();
-      } else if (event.which === 65 || event.which === 37) {
-        left();
+      switch (event.which) {
+        case 87:
+        case 38:
+          forward();
+          break;
+        case 68:
+        case 39:
+          right();
+          break;
+        case 83:
+        case 40:
+          backward();
+          break;
+        case 65:
+        case 37:
+          left();
+          break;
+        default:
+          break;
       }
     });
 
     document.addEventListener("keyup", function (event) {
-      if (
-        event.which === 87 ||
-        event.which === 38 ||
-        event.which === 83 ||
-        event.which === 40
-      ) {
-        stop();
+      switch (event.which) {
+        case 87:
+        case 38:
+        case 68:
+        case 39:
+        case 83:
+        case 40:
+        case 65:
+        case 37:
+          stop();
+          break;
+        default:
+          break;
       }
     });
+
     var manager = nipplejs.create({
       zone: document.getElementById("joystick"),
       mode: "static",
-      position: { left: "50%", top: "50%" },
       color: "blue",
+      position: { left: "50%", top: "50%" },
     });
 
     function radToDeg(radians) {
@@ -121,7 +145,7 @@
     }
 
     manager.on("move", function (event, data) {
-      heading = radToDeg(data.angle.radian + Math.PI) + 90;
+      heading = Math.abs(450 - data.angle.degree) % 360;
       speed = data.distance;
       send_control();
     });
