@@ -97,8 +97,8 @@ def control_event(message):
 
     speed, heading = control_str.split(',')
     
-    node.rvr_change_heading(float(round(float(heading))))
-    node.rvr_send_speed(float(round(float(speed))))
+    node.rvr_change_heading(float(heading))
+    node.rvr_send_speed(float(speed))
 
 @node.socketio.on('disconnect_request', namespace='/robot_control')
 def disconnect_request():
