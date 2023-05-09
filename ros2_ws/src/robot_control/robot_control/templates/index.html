@@ -15,6 +15,12 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"
+      integrity="sha512-xbQU0+iHqhVt7VIXi6vBJKPh3IQBF5B84sSHdjKiSccyX/1ZI7Vnkt2/8y8uruj63/DVmCxfUNohPNruthTEQA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
     <link
       rel="stylesheet"
       type="text/css"
@@ -35,57 +41,19 @@
     </div>
   </body>
   <script type="text/javascript" charset="utf-8">
-    function sendData(data) {
-      var XHR = new XMLHttpRequest();
-      var urlEncodedData = "";
-      var urlEncodedDataPairs = [];
-      var name;
-
-      // Turn the data object into an array of URL-encoded key/value pairs.
-      for (name in data) {
-        urlEncodedDataPairs.push(
-          encodeURIComponent(name) + "=" + encodeURIComponent(data[name])
-        );
-      }
-
-      // Combine the pairs into a single string and replace all %-encoded spaces to
-      // the '+' character; matches the behaviour of browser form submissions.
-      urlEncodedData = urlEncodedDataPairs.join("&").replace(/%20/g, "+");
-
-      // Define what happens on successful data submission
-      XHR.addEventListener("load", function (event) {
-        console.log("Successful response for " + data);
-      });
-
-      // Define what happens in case of error
-      XHR.addEventListener("error", function (event) {
-        console.log("Unsuccessful response for " + data);
-      });
-
-      // Set up our request
-      var url =
-        location.protocol +
-        "//" +
-        document.domain +
-        ":" +
-        location.port +
-        "/control_event";
-
-      XHR.open("POST", url);
-
-      // Add the required HTTP header for form data POST requests
-      XHR.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-      // Finally, send our data.
-      XHR.send(urlEncodedData);
-    }
+    namespace = '/robot_control';
+    var socket = io(namespace);
 
     var heading = 0.0;
     var speed = 0.0;
 
+    function sendDataOnSocket(data) {
+      socket.emit('control_event', data);
+    }
+
     function send_control() {
       var message = speed + "," + heading;
-      sendData({
+      sendDataOnSocket({
         control: message,
       });
       console.log("Control '" + message + "' sent to robot");
@@ -149,7 +117,7 @@
     });
 
     function radToDeg(radians) {
-      return radians * (180/Math.PI);
+      return radians * (180 / Math.PI);
     }
 
     manager.on("move", function (event, data) {

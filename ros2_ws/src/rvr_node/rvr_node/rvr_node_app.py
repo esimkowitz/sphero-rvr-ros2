@@ -98,7 +98,7 @@ class RvrNode(Node):
         return retval
 
     def change_heading(self, goal_handle):
-        theta = int(goal_handle.request.theta)
+        theta = goal_handle.request.theta
         self.get_logger().info('change_heading_start, theta: "%s"' % theta)
         result = ChangeHeading.Result()
         result.delta = self.set_heading_local(theta)

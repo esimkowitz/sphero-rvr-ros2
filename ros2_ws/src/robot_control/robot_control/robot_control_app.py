@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
-import os
-import signal
-
 # Impport flask and socketio packages
 import eventlet
 eventlet.monkey_patch()
 from threading import Thread
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit, Namespace
+from flask import Flask, render_template, request, copy_current_request_context
+from flask_socketio import SocketIO, emit, Namespace, disconnect
 
+import os
+import signal
 
 # import ros2 packages
 import rclpy
@@ -34,9 +33,6 @@ class RobotControlPublisher(Node):
         self.get_logger().info('node publisher initialized')
 
         self.app = Flask(__name__)
-        self.app.config['SECRET_KEY'] = 'secret!'
-        self.app.debug = False
-        self.app.threading = True
         self.my_ns = Namespace(self)     # Custom Flask Socket Namespace
         self.socketio = SocketIO(self.app, cors_allowed_origins="*") # Create Socket
         self.socketio.on_namespace(self.my_ns) # Pair the namespace
@@ -47,8 +43,7 @@ class RobotControlPublisher(Node):
 
     def server_start(self):
         self.flask_thread.start()
-        self.app.run(host='0.0.0.0', port=8080)
-        self.socketio.run(self.app)
+        self.socketio.run(self.app, host='0.0.0.0', port=8080)
         self.get_logger().info('flask server started')
 
     def server_cleanup(self):
@@ -90,23 +85,29 @@ class RobotControlPublisher(Node):
                 alive = False
 
 rclpy.init(args=None)
-publisher = RobotControlPublisher()
+node = RobotControlPublisher()
 
-@publisher.app.route('/')
+@node.app.route('/')
 def index():
     return render_template('index.html')
 
-@publisher.app.route('/control_event', methods=['POST'])
-def control_event():
-    if request.method == 'POST':
-        control_str = request.form['control']
+@node.socketio.on('control_event', namespace='/robot_control')
+def control_event(message):
+    control_str = message['control']
 
-        speed, heading = control_str.split(',')
-        
-        publisher.rvr_change_heading(float(round(float(heading))))
-        publisher.rvr_send_speed(float(round(float(speed))))
+    speed, heading = control_str.split(',')
+    
+    node.rvr_change_heading(float(round(float(heading))))
+    node.rvr_send_speed(float(round(float(speed))))
 
-    return 'OK'
+@node.socketio.on('disconnect_request', namespace='/robot_control')
+def disconnect_request():
+    @copy_current_request_context
+    def can_disconnect():
+        disconnect()
+    emit('my_response',
+         {'data': 'Disconnected!'},
+         callback=can_disconnect)
 
 def main():
     def end_process(signum=None):
@@ -117,7 +118,7 @@ def main():
             print("signal {} received by process with PID {}".format(
                 SIGNAL_NAMES_DICT[signum], os.getpid()))
         print("\n-- Terminating program --")
-        publisher.server_cleanup()
+        node.server_cleanup()
         os._exit(0)
 
     # Assign handler for process exit
@@ -127,7 +128,7 @@ def main():
     signal.signal(signal.SIGQUIT, end_process)
 
     # start the server
-    publisher.server_start()
+    node.server_start()
 
 if __name__ == '__main__':
     main()
