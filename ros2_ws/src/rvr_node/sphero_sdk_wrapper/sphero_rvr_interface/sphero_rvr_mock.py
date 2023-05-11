@@ -2,7 +2,7 @@ from . import SpheroRvrInterface
 
 from typing import Callable
 
-from .. import RvrStreamingServices
+from sphero_sdk_wrapper.sphero_sdk_raspberry_python.sphero_sdk import RvrStreamingServices
 
 import threading, time, random
 
@@ -25,7 +25,7 @@ class SpheroRvrMock(metaclass=SpheroRvrInterface):
         """Run an action 10s before the RVR sleeps."""
         pass
 
-    def add_sensor_data_handler(self, service: str, handler: Callable[[dict[str, float]], None]) -> None:
+    def add_sensor_data_handler(self, service: str, handler: Callable[any, None]) -> None:
         """Add a sensor data handler for the specified sensor service."""
         self.sensor_handlers[service] = handler
     
@@ -33,11 +33,31 @@ class SpheroRvrMock(metaclass=SpheroRvrInterface):
         while self.sensor_timer_continue:
             for service, handler in self.sensor_handlers.items():
                 match service:
-                    case RvrStreamingServices.imu:
-                        data = {'Pitch': 1.0, 'Roll': 1.0, 'Yaw': 1.0}
-                        handler(data)
                     case RvrStreamingServices.quaternion:
-                        data = {'W': random.random(), 'X': 1.0, 'Y': 1.0, 'Z': 1.0}
+                        data = {
+                            'Quaternion': 
+                            {
+                                'is_valid': True, 
+                                'W': random.random(), 
+                                'X': 0.050207495933912494, 
+                                'Y': -0.03013604856797869, 
+                                'Z': -0.0034241077963784727
+                            }, 
+                            'Accelerometer': 
+                            {
+                                'is_valid': True, 
+                                'X': random.random(), 
+                                'Y': -0.09291076289790468, 
+                                'Z': 0.9573230782890043
+                            }, 
+                            'Gyroscope': 
+                            {
+                                'is_valid': True, 
+                                'X': random.random(), 
+                                'Y': 0.14162110168058462, 
+                                'Z': 4.6566128730773926e-07
+                            }
+                        }
                         handler(data)
                     case RvrStreamingServices.accelerometer, RvrStreamingServices.gyroscope:
                         data = {'X': 1.0, 'Y': 1.0, 'Z': 1.0}

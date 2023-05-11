@@ -7,14 +7,15 @@ from rclpy.action import ActionServer
 from rclpy.executors import MultiThreadedExecutor
 import std_msgs.msg
 import sensor_msgs.msg
+from geometry_msgs.msg import Quaternion, Vector3
+
+from math import radians
 
 from rvr_interfaces.action import ChangeHeading
 
 # import sphero sdk packages
 from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, initialize_rvr_interface, initialize_rvr_sdk
-from sphero_sdk_wrapper.sphero_sdk_raspberry_python.sphero_sdk import RvrStreamingServices
-
-from .imu_data import ImuData
+from sphero_sdk_wrapper import RvrStreamingServices
 
 rvr_sdk = initialize_rvr_sdk()
 
@@ -66,15 +67,8 @@ class RvrNode(Node):
             self.change_heading)
         
         self.publish_rvr_imu_sensor = self.create_publisher(sensor_msgs.msg.Imu, 'rvr_imu', 10)
-        self.imu_data = ImuData()
-        self.sensor_publish_timer = self.create_timer(
-            0.1,
-            self.sensor_publish_callback
-        )
 
         self.rvr.add_sensor_data_handler(RvrStreamingServices.quaternion, self.quaternion_sensor_handler)
-        self.rvr.add_sensor_data_handler(RvrStreamingServices.accelerometer, self.accelerometer_sensor_handler)
-        self.rvr.add_sensor_data_handler(RvrStreamingServices.gyroscope, self.gyroscope_sensor_handler)
         self.rvr.start_sensor_streaming(streaming_interval_ms)
 
         self.get_logger().info('RvrNode init finished')
@@ -102,19 +96,31 @@ class RvrNode(Node):
                     heading=self.heading
                 )
 
-    def sensor_publish_callback(self):
-        imu_msg = self.imu_data.get_imu_msg()
-        self.get_logger().info(f'sensor pub: quaternion: [{imu_msg.orientation.w},{imu_msg.orientation.x},{imu_msg.orientation.y},{imu_msg.orientation.z}]')
-        self.publish_rvr_imu_sensor.publish(imu_msg)
-
-    def quaternion_sensor_handler(self, data: dict[str, float]):
-        self.imu_data.set_quaternion(data['W'], data['X'], data['Y'], data['Z'])
-    
-    def accelerometer_sensor_handler(self, data: dict[str, float]):
-        self.imu_data.set_linear_acceleration(data['X'], data['Y'], data['Z'])
-
-    def gyroscope_sensor_handler(self, data: dict[str, float]):
-        self.imu_data.set_angular_velocity_degrees(data['X'], data['Y'], data['Z'])
+    def quaternion_sensor_handler(self, data):
+        self.get_logger().info(f'quaternion: {data}')
+        orientation_data = Quaternion(
+            w=data[RvrStreamingServices.quaternion]['W'],
+            x=data[RvrStreamingServices.quaternion]['X'],
+            y=data[RvrStreamingServices.quaternion]['Y'],
+            z=data[RvrStreamingServices.quaternion]['Z']
+        )
+        linear_acceleration_data = Vector3(
+            x=data[RvrStreamingServices.accelerometer]['X'],
+            y=data[RvrStreamingServices.accelerometer]['Y'],
+            z=data[RvrStreamingServices.accelerometer]['Z']
+        )
+        angular_velocity_data = Vector3(
+            x=radians(data[RvrStreamingServices.gyroscope]['X']),
+            y=radians(data[RvrStreamingServices.gyroscope]['Y']),
+            z=radians(data[RvrStreamingServices.gyroscope]['Z'])
+        )
+        self.publish_rvr_imu_sensor.publish(
+            sensor_msgs.msg.Imu(
+                orientation=orientation_data,
+                linear_acceleration=linear_acceleration_data,
+                angular_velocity=angular_velocity_data
+            )
+        )
 
     def start_roll(self, msg: std_msgs.msg.Float32):
         self.speed = int(round(msg.data))

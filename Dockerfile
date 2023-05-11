@@ -12,6 +12,8 @@ COPY ./ros2_ws /app/ros2_ws
 WORKDIR /app/ros2_ws/src/rvr_node/sphero_sdk_wrapper/sphero_sdk_raspberry_python/sphero_sdk/common/firmware
 RUN sed -i '/input()/d' cms_fw_check_base.py
 # End remove blocking input()
+WORKDIR /app/ros2_ws/src/rvr_node/sphero_sdk_wrapper/sphero_sdk_raspberry_python
+RUN touch __init__.py
 WORKDIR /app/ros2_ws
 RUN python3 -m pip install \
         -r ./src/rvr_node/requirements.txt \
