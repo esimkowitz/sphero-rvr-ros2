@@ -19,7 +19,12 @@ from sphero_sdk_wrapper import RvrStreamingServices
 
 rvr_sdk = initialize_rvr_sdk()
 
-streaming_interval_ms = 50
+streaming_interval_ms = 200
+
+def throwaway_callback(data):
+    """Throwaway callback for sensors since the Sphero SDK makes you specify a callback for each but returns all the data 
+    for all sensors for each callback, regardless of the sensor it's registered to."""
+    pass
 
 class RvrNode(Node):
     def __init__(self, rvr_client: SpheroRvrInterface) -> None:
@@ -68,7 +73,9 @@ class RvrNode(Node):
         
         self.publish_rvr_imu_sensor = self.create_publisher(sensor_msgs.msg.Imu, 'rvr_imu', 10)
 
-        self.rvr.add_sensor_data_handler(RvrStreamingServices.quaternion, self.quaternion_sensor_handler)
+        self.rvr.add_sensor_data_handler(RvrStreamingServices.quaternion, self.sensor_callback)
+        self.rvr.add_sensor_data_handler(RvrStreamingServices.accelerometer, lambda *args: None)
+        self.rvr.add_sensor_data_handler(RvrStreamingServices.gyroscope, lambda *args: None)
         self.rvr.start_sensor_streaming(streaming_interval_ms)
 
         self.get_logger().info('RvrNode init finished')
@@ -96,7 +103,7 @@ class RvrNode(Node):
                     heading=self.heading
                 )
 
-    def quaternion_sensor_handler(self, data):
+    def sensor_callback(self, data):
         self.get_logger().info(f'quaternion: {data}')
         orientation_data = Quaternion(
             w=data[RvrStreamingServices.quaternion]['W'],

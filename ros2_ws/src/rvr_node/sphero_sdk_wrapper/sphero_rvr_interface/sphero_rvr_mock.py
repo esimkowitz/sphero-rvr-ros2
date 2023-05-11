@@ -32,39 +32,30 @@ class SpheroRvrMock(metaclass=SpheroRvrInterface):
     def timer_callback(self):
         while self.sensor_timer_continue:
             for service, handler in self.sensor_handlers.items():
-                match service:
-                    case RvrStreamingServices.quaternion:
-                        data = {
-                            'Quaternion': 
-                            {
-                                'is_valid': True, 
-                                'W': random.random(), 
-                                'X': 0.050207495933912494, 
-                                'Y': -0.03013604856797869, 
-                                'Z': -0.0034241077963784727
-                            }, 
-                            'Accelerometer': 
-                            {
-                                'is_valid': True, 
-                                'X': random.random(), 
-                                'Y': -0.09291076289790468, 
-                                'Z': 0.9573230782890043
-                            }, 
-                            'Gyroscope': 
-                            {
-                                'is_valid': True, 
-                                'X': random.random(), 
-                                'Y': 0.14162110168058462, 
-                                'Z': 4.6566128730773926e-07
-                            }
+                handler({
+                        'Quaternion': 
+                        {
+                            'is_valid': True, 
+                            'W': random.random(), 
+                            'X': 0.050207495933912494, 
+                            'Y': -0.03013604856797869, 
+                            'Z': -0.0034241077963784727
+                        }, 
+                        'Accelerometer': 
+                        {
+                            'is_valid': True, 
+                            'X': random.random(), 
+                            'Y': -0.09291076289790468, 
+                            'Z': 0.9573230782890043
+                        }, 
+                        'Gyroscope': 
+                        {
+                            'is_valid': True, 
+                            'X': random.random(), 
+                            'Y': 0.14162110168058462, 
+                            'Z': 4.6566128730773926e-07
                         }
-                        handler(data)
-                    case RvrStreamingServices.accelerometer, RvrStreamingServices.gyroscope:
-                        data = {'X': 1.0, 'Y': 1.0, 'Z': 1.0}
-                        handler(data)
-                    case _:
-                        # Do nothing
-                        pass
+                    })
             time.sleep(self.sensor_timer_interval)
 
     def start_sensor_streaming(self, interval: int) -> None:
