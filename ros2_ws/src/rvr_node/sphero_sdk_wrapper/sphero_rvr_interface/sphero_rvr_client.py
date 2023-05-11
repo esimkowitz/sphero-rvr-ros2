@@ -1,3 +1,5 @@
+from typing import Callable
+
 from sphero_sdk_wrapper.sphero_sdk_raspberry_python.sphero_sdk import SpheroRvrObserver
 
 from .sphero_rvr_interface import SpheroRvrInterface
@@ -28,11 +30,11 @@ class SpheroRvrClient(metaclass=SpheroRvrInterface):
         self.rvr.sensor_control.clear(),
         self.rvr.close()
 
-    def on_will_sleep_notify(self, handler, timeout: float) -> None:
+    def on_will_sleep_notify(self, handler: Callable, timeout: float) -> None:
         """Run an action 10s before the RVR sleeps."""
         self.rvr.on_will_sleep_notify(handler=handler, timeout=timeout)
 
-    def add_sensor_data_handler(self, service: str, handler) -> None:
+    def add_sensor_data_handler(self, service: str, handler: Callable[[dict[str, float]], None]) -> None:
         """Add a sensor data handler for the specified sensor service."""
         self.rvr.sensor_control.add_sensor_data_handler(service, handler)
     

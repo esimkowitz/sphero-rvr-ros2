@@ -14,6 +14,7 @@ import signal
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
+from rclpy.executors import MultiThreadedExecutor
 import std_msgs.msg
 import sensor_msgs.msg
 
@@ -24,20 +25,24 @@ debug = True
 script_dir = os.path.realpath(os.path.dirname(__file__))
 template_dir = os.path.join(script_dir, 'templates')
 
+rclpy.init(args=None)
+executor = MultiThreadedExecutor()
+
 class RobotControl(Node):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('robot_control_node')
         self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
         self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_start_roll', 10)
         self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10)
         self.change_heading_client = ActionClient(self, ChangeHeading, 'change_heading')
-        self.get_logger().info('node publisher initialized')
+        self.get_logger().info('node publishers initialized')
 
-        self.stop_roll_sub = self.create_subscription(
+        self.rvr_imu_sub = self.create_subscription(
                     sensor_msgs.msg.Imu,
                     'rvr_imu',
                     self.imu_handler,
                     10)
+        self.get_logger().info('node subscribers initialized')
 
         self.app = Flask(__name__)
         self.my_ns = Namespace(self)     # Custom Flask Socket Namespace
@@ -48,32 +53,32 @@ class RobotControl(Node):
             target=self.process, daemon=True)
         self.get_logger().info('flask server initialized')
 
-    def imu_handler(self, imu_msg: sensor_msgs.msg.Imu):
+    def imu_handler(self, imu_msg: sensor_msgs.msg.Imu) -> None:
         self.get_logger().info(f'new imu msg: quaternion: [{imu_msg.orientation.w},{imu_msg.orientation.x},{imu_msg.orientation.y},{imu_msg.orientation.z}]')
 
-    def server_start(self):
+    def server_start(self) -> None:
         self.flask_thread.start()
         self.socketio.run(self.app, host='0.0.0.0', port=8080)
         self.get_logger().info('flask server started')
 
-    def server_cleanup(self):
+    def server_cleanup(self) -> None:
         self.get_logger().info('Shutting down Flask server')
         self.app.shutdown()
         self.get_logger().info('Waiting for Flask thread to finish')
         self.flask_thread.join()
         self.get_logger().info('Flask thread finished')
 
-    def rvr_change_leds(self, data):
+    def rvr_change_leds(self, data: list[float]) -> None:
         msg = std_msgs.msg.Float32MultiArray()
         msg.data = data
         self.publish_rvr_change_leds.publish(msg)
 
-    def rvr_send_speed(self, speed):
+    def rvr_send_speed(self, speed: float) -> None:
         msg = std_msgs.msg.Float32()
         msg.data = speed
         self.publish_rvr_start_roll.publish(msg)
 
-    def rvr_change_heading(self, heading_theta):
+    def rvr_change_heading(self, heading_theta: float) -> None:
         goal_msg = ChangeHeading.Goal()
         goal_msg.theta = heading_theta
 
@@ -81,20 +86,19 @@ class RobotControl(Node):
 
         return self.change_heading_client.send_goal_async(goal_msg)
 
-    def process(self):
+    def process(self) -> None:
         alive = True
         while alive:
             try:
                 # Check that the ROS node is still alive
                 self.assert_liveliness()
                 # Spin the ROS node once...
-                rclpy.spin_once(self,timeout_sec=0.0)
+                rclpy.spin_once(self, executor=executor, timeout_sec=0.0)
                 # ...and then momentarily sleep so the other process (socket.io) can run.
                 eventlet.greenthread.sleep()
             except Exception:
                 alive = False
 
-rclpy.init(args=None)
 node = RobotControl()
 
 @node.app.route('/')

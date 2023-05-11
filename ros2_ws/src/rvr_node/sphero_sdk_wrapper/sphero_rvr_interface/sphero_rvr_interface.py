@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Callable
 
 class SpheroRvrInterface(ABCMeta):
     @abstractmethod
@@ -12,12 +13,12 @@ class SpheroRvrInterface(ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def on_will_sleep_notify(self, handler, timeout: float) -> None:
+    def on_will_sleep_notify(self, handler: Callable, timeout: float) -> None:
         """Run an action 10s before the RVR sleeps."""
         raise NotImplementedError
     
     @abstractmethod
-    def add_sensor_data_handler(self, service: str, handler) -> None:
+    def add_sensor_data_handler(self, service: str, handler: Callable[[dict[str, float]], None]) -> None:
         """Add a sensor data handler for the specified sensor service."""
         raise NotImplementedError
     
