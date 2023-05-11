@@ -5,13 +5,19 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
 import std_msgs.msg
+import geometry_msgs.msg
+import sensor_msgs.msg
 
 from rvr_interfaces.action import ChangeHeading
 
 # import sphero sdk packages
 from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, initialize_rvr_interface, initialize_rvr_sdk
 
+from .imu_data import ImuData
+
 rvr_sdk = initialize_rvr_sdk()
+
+streaming_interval_ms = 50
 
 class RvrNode(Node):
 
@@ -58,10 +64,23 @@ class RvrNode(Node):
             ChangeHeading,
             'change_heading',
             self.change_heading)
+        
+        self.publish_rvr_imu_sensor = self.create_publisher(sensor_msgs.msg.Imu, 'rvr_imu', 10)
+        self.imu_data = ImuData()
+        self.sensor_publish_timer = self.create_timer(
+            0.1,
+            self.sensor_publish_callback
+        )
+
+        self.rvr.add_sensor_data_handler('Quaternion', self.quaternion_sensor_handler)
+        self.rvr.add_sensor_data_handler('Accelerometer', self.accelerometer_sensor_handler)
+        self.rvr.add_sensor_data_handler('Gyroscope', self.gyroscope_sensor_handler)
+        self.rvr.start_sensor_streaming(streaming_interval_ms)
 
         self.get_logger().info('RvrNode init finished')
 
     def close(self):
+        self.rvr.stop_sensor_streaming()
         self.rvr.close()
 
     def keep_alive(self):
@@ -82,6 +101,19 @@ class RvrNode(Node):
                 self.rvr.stop_roll(
                     heading=self.heading
                 )
+
+    def sensor_publish_callback(self):
+        self.get_logger().info('sensor pub')
+        self.publish_rvr_imu_sensor.publish(self.imu_data.get_imu_msg())
+
+    def quaternion_sensor_handler(self, data):
+        self.imu_data.set_quaternion(float(data['W']), float(data['X']), float(data['Y']), float(data['Z']))
+    
+    def accelerometer_sensor_handler(self, data):
+        self.imu_data.set_linear_acceleration(float(data['X']), float(data['Y']), float(data['Z']))
+
+    def gyroscope_sensor_handler(self, data):
+        self.imu_data.set_angular_velocity_degrees(float(data['X']), float(data['Y']), float(data['Z']))
 
     def start_roll(self, msg):
         self.speed = int(round(msg.data))

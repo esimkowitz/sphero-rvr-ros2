@@ -1,7 +1,6 @@
 from sphero_sdk_wrapper.sphero_sdk_raspberry_python.sphero_sdk import SpheroRvrObserver
 
 from .sphero_rvr_interface import SpheroRvrInterface
-from .utilities import should_mock_rvr
 
 debug = False
 delay = 250
@@ -32,6 +31,18 @@ class SpheroRvrClient(metaclass=SpheroRvrInterface):
     def on_will_sleep_notify(self, handler, timeout: float) -> None:
         """Run an action 10s before the RVR sleeps."""
         self.rvr.on_will_sleep_notify(handler=handler, timeout=timeout)
+
+    def add_sensor_data_handler(self, service: str, handler) -> None:
+        """Add a sensor data handler for the specified sensor service."""
+        self.rvr.sensor_control.add_sensor_data_handler(service, handler)
+    
+    def start_sensor_streaming(self, interval: int) -> None:
+        """Start the sensor streaming at the specified interval."""
+        self.rvr.sensor_control.start(interval)
+    
+    def stop_sensor_streaming(self) -> None:
+        """Stop all sensor streaming."""
+        self.rvr.sensor_control.stop()
     
     def start_roll(self, speed: int, heading: int) -> None:
         """Start roll at a specified speed and heading."""

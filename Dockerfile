@@ -18,8 +18,6 @@ RUN python3 -m pip install \
         -r ./src/robot_control/requirements.txt && \
     source /opt/ros/humble/setup.bash && \
     rosdep update && rosdep install --from-paths src -y --ignore-src && \
-    colcon build && \
-    rm -rf /app/ros2_ws/src && \
-    rm -rf /app/ros2_ws/build
+    colcon build
 EXPOSE 8080
 ENTRYPOINT [ "/app/scripts/container/ros_entrypoint.sh" ]

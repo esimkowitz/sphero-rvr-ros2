@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-# Impport flask and socketio packages
+# Impport flask and socketio packages, socketio workaround found by https://answers.ros.org/question/345286/ros2-flask-threading-issue/
 import eventlet
 eventlet.monkey_patch()
 from threading import Thread
-from flask import Flask, render_template, request, copy_current_request_context
-from flask_socketio import SocketIO, emit, Namespace, disconnect
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit, Namespace
 
 import os
 import signal
@@ -15,6 +15,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
 import std_msgs.msg
+import sensor_msgs.msg
 
 from rvr_interfaces.action import ChangeHeading
 
@@ -23,7 +24,7 @@ debug = True
 script_dir = os.path.realpath(os.path.dirname(__file__))
 template_dir = os.path.join(script_dir, 'templates')
 
-class RobotControlPublisher(Node):
+class RobotControl(Node):
     def __init__(self):
         super().__init__('robot_control_node')
         self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
@@ -31,6 +32,12 @@ class RobotControlPublisher(Node):
         self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10)
         self.change_heading_client = ActionClient(self, ChangeHeading, 'change_heading')
         self.get_logger().info('node publisher initialized')
+
+        self.stop_roll_sub = self.create_subscription(
+                    sensor_msgs.msg.Imu,
+                    'rvr_imu',
+                    self.imu_handler,
+                    10)
 
         self.app = Flask(__name__)
         self.my_ns = Namespace(self)     # Custom Flask Socket Namespace
@@ -40,6 +47,9 @@ class RobotControlPublisher(Node):
         self.flask_thread = Thread(
             target=self.process, daemon=True)
         self.get_logger().info('flask server initialized')
+
+    def imu_handler(self, imu_msg: sensor_msgs.msg.Imu):
+        self.get_logger().info(f'new imu msg: quaternion: [{imu_msg.orientation.w},{imu_msg.orientation.x},{imu_msg.orientation.y},{imu_msg.orientation.z}]')
 
     def server_start(self):
         self.flask_thread.start()
@@ -85,7 +95,7 @@ class RobotControlPublisher(Node):
                 alive = False
 
 rclpy.init(args=None)
-node = RobotControlPublisher()
+node = RobotControl()
 
 @node.app.route('/')
 def index():

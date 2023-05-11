@@ -17,6 +17,21 @@ class SpheroRvrInterface(ABCMeta):
         raise NotImplementedError
     
     @abstractmethod
+    def add_sensor_data_handler(self, service: str, handler) -> None:
+        """Add a sensor data handler for the specified sensor service."""
+        raise NotImplementedError
+    
+    @abstractmethod
+    def start_sensor_streaming(self, interval: int) -> None:
+        """Start the sensor streaming at the specified interval (in ms)."""
+        raise NotImplementedError
+    
+    @abstractmethod
+    def stop_sensor_streaming(self) -> None:
+        """Stop all sensor streaming."""
+        raise NotImplementedError
+
+    @abstractmethod
     def start_roll(self, speed: int, heading: int) -> None:
         """Start roll at a specified speed and heading."""
         raise NotImplementedError
