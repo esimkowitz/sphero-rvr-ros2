@@ -11,7 +11,7 @@ class SpheroRvrMock(metaclass=SpheroRvrInterface):
         self.sensor_handlers = {}
         self.sensor_timer_thread = threading.Thread(target=self.timer_callback, daemon=True)
         self.sensor_timer_continue = False
-        self.sensor_timer_interval = 0.0
+        self.sensor_timer_interval_seconds = 0.0
     
     def wake(self) -> None:
         """Wake the RVR from sleep."""
@@ -30,6 +30,7 @@ class SpheroRvrMock(metaclass=SpheroRvrInterface):
         self.sensor_handlers[service] = handler
     
     def timer_callback(self):
+        next_time = time.time()
         while self.sensor_timer_continue:
             for service, handler in self.sensor_handlers.items():
                 handler({
@@ -56,11 +57,12 @@ class SpheroRvrMock(metaclass=SpheroRvrInterface):
                             'Z': 4.6566128730773926e-07
                         }
                     })
-            time.sleep(self.sensor_timer_interval)
+            next_time += self.sensor_timer_interval_seconds
+            time.sleep(next_time - time.time())
 
     def start_sensor_streaming(self, interval: int) -> None:
-        """Start the sensor streaming at the specified interval."""
-        self.timer_interval = float(interval) / 1000.0
+        """Start the sensor streaming at the specified interval (in ms)."""
+        self.sensor_timer_interval_seconds = float(interval)/1000.0
         self.sensor_timer_continue = True
         self.sensor_timer_thread.start()
 

@@ -39,7 +39,7 @@ class SpheroRvrClient(metaclass=SpheroRvrInterface):
         self.rvr.sensor_control.add_sensor_data_handler(service, handler)
     
     def start_sensor_streaming(self, interval: int) -> None:
-        """Start the sensor streaming at the specified interval."""
+        """Start the sensor streaming at the specified interval (in ms)."""
         self.rvr.sensor_control.start(interval)
     
     def stop_sensor_streaming(self) -> None:

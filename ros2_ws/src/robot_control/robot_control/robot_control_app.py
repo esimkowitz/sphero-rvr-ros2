@@ -15,6 +15,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
 from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 import std_msgs.msg
 import sensor_msgs.msg
 
@@ -31,24 +32,31 @@ executor = MultiThreadedExecutor()
 class RobotControl(Node):
     def __init__(self) -> None:
         super().__init__('robot_control_node')
-        self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10)
-        self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_start_roll', 10)
-        self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10)
-        self.change_heading_client = ActionClient(self, ChangeHeading, 'change_heading')
+        self.publisher_callback_group = MutuallyExclusiveCallbackGroup()
+        self.action_server_callback_group = MutuallyExclusiveCallbackGroup()
+        self.subscriber_callback_group = MutuallyExclusiveCallbackGroup()
+        self.timer_callback_group = MutuallyExclusiveCallbackGroup()
+        self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10, callback_group=self.publisher_callback_group)
+        self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_start_roll', 10, callback_group=self.publisher_callback_group)
+        self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10, callback_group=self.publisher_callback_group)
+        self.change_heading_client = ActionClient(self, ChangeHeading, 'change_heading', callback_group=self.action_server_callback_group)
         self.get_logger().info('node publishers initialized')
 
         self.rvr_imu_sub = self.create_subscription(
-                    sensor_msgs.msg.Imu,
-                    'rvr_imu',
-                    self.imu_handler,
-                    10)
+            sensor_msgs.msg.Imu,
+            'rvr_imu',
+            self.imu_handler,
+            10,
+            callback_group=self.subscriber_callback_group
+        )
+        self.rvr_imu_sub # prevent unused variable warning
         self.get_logger().info('node subscribers initialized')
 
         self.app = Flask(__name__)
         self.my_ns = Namespace(self)     # Custom Flask Socket Namespace
         self.socketio = SocketIO(self.app, cors_allowed_origins="*") # Create Socket
         self.socketio.on_namespace(self.my_ns) # Pair the namespace
-        self.process_timer = self.create_timer(.1,self.process)
+        self.thread_continue = True
         self.flask_thread = Thread(
             target=self.process, daemon=True)
         self.get_logger().info('flask server initialized')
@@ -64,6 +72,7 @@ class RobotControl(Node):
     def server_cleanup(self) -> None:
         self.get_logger().info('Shutting down Flask server')
         self.app.shutdown()
+        self.thread_continue = False
         self.get_logger().info('Waiting for Flask thread to finish')
         self.flask_thread.join()
         self.get_logger().info('Flask thread finished')
@@ -87,17 +96,11 @@ class RobotControl(Node):
         return self.change_heading_client.send_goal_async(goal_msg)
 
     def process(self) -> None:
-        alive = True
-        while alive:
-            try:
-                # Check that the ROS node is still alive
-                self.assert_liveliness()
-                # Spin the ROS node once...
-                rclpy.spin_once(self, executor=executor, timeout_sec=0.0)
-                # ...and then momentarily sleep so the other process (socket.io) can run.
-                eventlet.greenthread.sleep()
-            except Exception:
-                alive = False
+        while self.thread_continue:
+            # Spin the ROS node once...
+            rclpy.spin_once(self, executor=executor, timeout_sec=0.01)
+            # ...and then momentarily sleep so the other process (socket.io) can run.
+            eventlet.greenthread.sleep()
 
 node = RobotControl()
 

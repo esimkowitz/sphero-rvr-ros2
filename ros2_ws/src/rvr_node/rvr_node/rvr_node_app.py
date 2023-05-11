@@ -19,7 +19,7 @@ from sphero_sdk_wrapper import RvrStreamingServices
 
 rvr_sdk = initialize_rvr_sdk()
 
-streaming_interval_ms = 200
+streaming_interval_ms = 1000
 
 def throwaway_callback(data):
     """Throwaway callback for sensors since the Sphero SDK makes you specify a callback for each but returns all the data 
