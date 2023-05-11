@@ -1,6 +1,6 @@
 from typing import Callable
 
-from sphero_sdk_wrapper.sphero_sdk_raspberry_python.sphero_sdk import SpheroRvrObserver
+from .. import SpheroRvrObserver
 
 from .sphero_rvr_interface import SpheroRvrInterface
 

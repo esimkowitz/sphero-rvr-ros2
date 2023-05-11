@@ -2,7 +2,7 @@ from . import SpheroRvrInterface
 
 from typing import Callable
 
-from sphero_sdk_wrapper.sphero_sdk_raspberry_python.sphero_sdk import RvrStreamingServices
+from .. import RvrStreamingServices
 
 import threading, time, random
 

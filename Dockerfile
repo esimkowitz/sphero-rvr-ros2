@@ -19,5 +19,12 @@ RUN python3 -m pip install \
     source /opt/ros/humble/setup.bash && \
     rosdep update && rosdep install --from-paths src -y --ignore-src && \
     colcon build
+
+FROM build
+ARG include_src="false"
+RUN if ! $include_src == "false" ; then \
+        rm -rf /app/ros2_ws/src && \
+        rm -rf /app/ros2_ws/build ; \
+    fi
 EXPOSE 8080
 ENTRYPOINT [ "/app/scripts/container/ros_entrypoint.sh" ]
