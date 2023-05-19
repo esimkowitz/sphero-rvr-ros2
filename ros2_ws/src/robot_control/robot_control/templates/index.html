@@ -53,7 +53,16 @@
       socket.emit("control_event", data);
     }
 
+    var nextControlSend = Date.now();
+    var controlSendIntervalMs = 50;
     function sendControl() {
+
+      // Slow down sending controls to the robot so we don't overwhelm it
+      curTime = Date.now()
+      if (curTime < nextControlSend) {
+        return;
+      }
+      nextControlSend = curTime + controlSendIntervalMs;
       document.getElementById("heading").innerHTML = heading;
       document.getElementById("speed").innerHTML = speed;
 
@@ -143,11 +152,15 @@
       position: { left: "50%", top: "50%" },
     });
 
-    function radToDeg(radians) {
-      return radians * (180 / Math.PI);
-    }
-
     manager.on("move", function (event, data) {
+      // Correct the heading. Nipple.js outputs the angle like this:
+      //      270
+      //  0       180
+      //      90
+      // But we want it like this to send to the robot:
+      //      0
+      //  270     90
+      //      180
       heading = Math.abs(450 - data.angle.degree) % 360;
       speed = data.distance;
       sendControl();

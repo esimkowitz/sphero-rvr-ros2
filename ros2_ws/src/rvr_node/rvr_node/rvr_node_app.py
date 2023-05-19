@@ -5,13 +5,14 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
 from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import ReentrantCallbackGroup, MutuallyExclusiveCallbackGroup
 import std_msgs.msg
 import sensor_msgs.msg
 from geometry_msgs.msg import Quaternion, Vector3
 
 from math import radians
 
-from rvr_interfaces.action import ChangeHeading
+from rvr_interfaces.action import ChangeHeading, DriveWithHeading, StopWithHeading
 
 # import sphero sdk packages
 from sphero_sdk_wrapper.sphero_rvr_interface import SpheroRvrInterface, initialize_rvr_interface, initialize_rvr_sdk
@@ -20,11 +21,6 @@ from sphero_sdk_wrapper import RvrStreamingServices
 rvr_sdk = initialize_rvr_sdk()
 
 streaming_interval_ms = 1000
-
-def throwaway_callback(data):
-    """Throwaway callback for sensors since the Sphero SDK makes you specify a callback for each but returns all the data 
-    for all sensors for each callback, regardless of the sensor it's registered to."""
-    pass
 
 class RvrNode(Node):
     def __init__(self, rvr_client: SpheroRvrInterface) -> None:
@@ -43,33 +39,48 @@ class RvrNode(Node):
 
         self.rvr.on_will_sleep_notify(self.keep_alive, None)
 
+        self.timer_callback_group = MutuallyExclusiveCallbackGroup()
+        self.primary_callback_group = ReentrantCallbackGroup()
+
         self.command_timer = self.create_timer(
             0.01,
-            self.command_callback)
+            self.command_callback,
+            callback_group=self.timer_callback_group)
         self.publisher_ = self.create_publisher(
             std_msgs.msg.String,
             'rvr_sensors',  # publish to chatter channel
-            10)
+            10,
+            callback_group=self.primary_callback_group)
         self.set_leds_sub = self.create_subscription(
             std_msgs.msg.Float32MultiArray,
             'rvr_change_leds',   
             self.set_leds,
-            10)
+            10,
+            callback_group=self.primary_callback_group)
         self.start_roll_sub = self.create_subscription(
             std_msgs.msg.Float32,
             'rvr_start_roll',   
             self.start_roll,
-            10)
+            10,
+            callback_group=self.primary_callback_group)
         self.stop_roll_sub = self.create_subscription(
             std_msgs.msg.Empty,
             'rvr_stop_roll',
             self.stop_roll,
-            10)
-        self._action_server = ActionServer(
-            self,
-            ChangeHeading,
-            'change_heading',
-            self.change_heading)
+            10,
+            callback_group=self.primary_callback_group)
+        self.change_heading_sub = self.create_subscription(
+            std_msgs.msg.Float32,
+            'rvr_change_heading',
+            self.change_heading_topic,
+            10,
+            callback_group=self.primary_callback_group)
+        # self.drive_with_heading_server = ActionServer(
+        #     self,
+        #     DriveWithHeading,
+        #     'drive_with_heading',
+        #     self.change_heading,
+        #     callback_group=self.primary_callback_group)
         
         self.publish_rvr_imu_sensor = self.create_publisher(sensor_msgs.msg.Imu, 'rvr_imu', 10)
 
@@ -93,15 +104,10 @@ class RvrNode(Node):
             self.event_to_process = False
             if self.speed != 0:
                 self.get_logger().info(f'start_roll: speed "{self.speed}", heading "{self.heading}"')
-                self.rvr.start_roll(
-                    speed=self.speed,
-                    heading=self.heading
-                )
+                self.rvr.start_roll(self.speed, self.heading)
             else:
                 self.get_logger().info(f'stop_roll: heading "{self.heading}"')
-                self.rvr.stop_roll(
-                    heading=self.heading
-                )
+                self.rvr.stop_roll(heading=self.heading)
 
     def sensor_callback(self, data):
         self.get_logger().info(f'quaternion: {data}')
@@ -136,6 +142,9 @@ class RvrNode(Node):
     def stop_roll(self, msg: std_msgs.msg.Empty):
         self.speed = 0
         self.event_to_process = True
+
+    def change_heading_topic(self, msg: std_msgs.msg.Float32):
+        self.set_heading_local(new_heading=msg.data)
 
     def set_heading_local(self, new_heading: float):
         retval = abs(self.heading - new_heading)

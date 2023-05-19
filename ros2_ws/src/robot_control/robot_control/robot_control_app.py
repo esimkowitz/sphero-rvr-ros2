@@ -15,7 +15,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
 from rclpy.executors import MultiThreadedExecutor
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 import std_msgs.msg
 import sensor_msgs.msg
 
@@ -32,14 +32,12 @@ executor = MultiThreadedExecutor()
 class RobotControl(Node):
     def __init__(self) -> None:
         super().__init__('robot_control_node')
-        self.publisher_callback_group = MutuallyExclusiveCallbackGroup()
-        self.action_server_callback_group = MutuallyExclusiveCallbackGroup()
-        self.subscriber_callback_group = MutuallyExclusiveCallbackGroup()
-        self.timer_callback_group = MutuallyExclusiveCallbackGroup()
-        self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10, callback_group=self.publisher_callback_group)
-        self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_start_roll', 10, callback_group=self.publisher_callback_group)
-        self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10, callback_group=self.publisher_callback_group)
-        self.change_heading_client = ActionClient(self, ChangeHeading, 'change_heading', callback_group=self.action_server_callback_group)
+        self.primary_callback_group = ReentrantCallbackGroup()
+        self.publish_rvr_change_leds = self.create_publisher(std_msgs.msg.Float32MultiArray, 'rvr_change_leds', 10, callback_group=self.primary_callback_group)
+        self.publish_rvr_start_roll = self.create_publisher(std_msgs.msg.Float32, 'rvr_start_roll', 10, callback_group=self.primary_callback_group)
+        self.publish_rvr_stop_roll = self.create_publisher(std_msgs.msg.Empty, 'rvr_stop_roll', 10, callback_group=self.primary_callback_group)
+        # self.change_heading_client = ActionClient(self, ChangeHeading, 'change_heading', callback_group=self.primary_callback_group)
+        self.change_heading_pub = self.create_publisher(std_msgs.msg.Float32, 'rvr_change_heading', 10, callback_group=self.primary_callback_group)
         self.get_logger().info('node publishers initialized')
 
         self.rvr_imu_sub = self.create_subscription(
@@ -47,7 +45,7 @@ class RobotControl(Node):
             'rvr_imu',
             self.imu_handler,
             10,
-            callback_group=self.subscriber_callback_group
+            callback_group=self.primary_callback_group
         )
         self.rvr_imu_sub # prevent unused variable warning
         self.get_logger().info('node subscribers initialized')
@@ -88,12 +86,16 @@ class RobotControl(Node):
         self.publish_rvr_start_roll.publish(msg)
 
     def rvr_change_heading(self, heading_theta: float) -> None:
-        goal_msg = ChangeHeading.Goal()
-        goal_msg.theta = heading_theta
+        # goal_msg = ChangeHeading.Goal()
+        # goal_msg.theta = heading_theta
 
-        self.change_heading_client.wait_for_server()
+        # self.change_heading_client.wait_for_server()
 
-        return self.change_heading_client.send_goal_async(goal_msg)
+        # return self.change_heading_client.send_goal_async(goal_msg)
+
+        msg = std_msgs.msg.Float32()
+        msg.data = heading_theta
+        self.change_heading_pub.publish(msg)
 
     def process(self) -> None:
         while self.thread_continue:

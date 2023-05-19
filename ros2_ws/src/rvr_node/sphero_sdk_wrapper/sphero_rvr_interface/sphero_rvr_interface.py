@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from typing import Callable
+from ctypes import c_uint8
 
 class SpheroRvrInterface(ABCMeta):
     @abstractmethod
@@ -45,4 +46,9 @@ class SpheroRvrInterface(ABCMeta):
     @abstractmethod
     def set_heading(self, heading: int) -> None:
         """Set heading."""
-        pass
+        raise NotImplementedError
+
+    @abstractmethod
+    def drive_with_heading(self, speed: int, heading: int, timeout : float | None = None) -> None:
+        """Start driving at a set heading and speed."""
+        raise NotImplementedError

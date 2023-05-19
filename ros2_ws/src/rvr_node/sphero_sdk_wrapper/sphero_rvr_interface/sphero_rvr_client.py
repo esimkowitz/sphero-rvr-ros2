@@ -4,6 +4,8 @@ from sphero_sdk_wrapper.sphero_sdk_raspberry_python.sphero_sdk import SpheroRvrO
 
 from .sphero_rvr_interface import SpheroRvrInterface
 
+import numpy as np
+
 debug = False
 delay = 250
 size = 31 
@@ -16,6 +18,8 @@ ambient_global = {}
 encoder_global = {}
 
 received = 0x00     # received byte - fully received at 0x1f
+flag_empty = np.byte(0x00)
+flag_reverse = np.byte(0x01)
 
 class SpheroRvrClient(metaclass=SpheroRvrInterface):
     def __init__(self, rvr: SpheroRvrObserver) -> None:
@@ -64,3 +68,16 @@ class SpheroRvrClient(metaclass=SpheroRvrInterface):
         self.rvr.drive_control.set_heading(
             heading=heading
         )
+
+    def drive_with_heading(self, speed: int, heading: int, timeout : float | None = None) -> None:
+        """Start driving at a set heading and speed."""
+        flags = flag_empty
+        if (speed > 0): 
+            flags = flag_reverse # drive reverse
+            speed = abs(speed)
+        
+        speed_uint = np.uint8(speed)
+        heading_uint = np.uint16(heading)
+
+        self.rvr.drive_with_heading(speed_uint, heading_uint, flags, timeout)
+        

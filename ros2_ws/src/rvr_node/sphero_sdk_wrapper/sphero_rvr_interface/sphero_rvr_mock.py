@@ -82,3 +82,7 @@ class SpheroRvrMock(metaclass=SpheroRvrInterface):
     def set_heading(self, heading: int) -> None:
         """Set heading."""
         pass
+
+    def drive_with_heading(self, speed: int, heading: int, timeout : float | None = None) -> None:
+        """Start driving at a set heading and speed."""
+        pass
