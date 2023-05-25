@@ -3,4 +3,4 @@
 	url = https://github.com/sphero-inc/sphero-sdk-raspberrypi-python.git
 [submodule "ros2_ws/src/sweep_ros"]
 	path = ros2_ws/src/sweep_ros
-	url = https://github.com/esimkowitz/sweep-ros.git
+	url = https://github.com/esimkowitz/sweep-ros2.git
