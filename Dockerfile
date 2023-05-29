@@ -8,8 +8,6 @@ RUN rm /ros_entrypoint.sh && \
 
 FROM base AS build
 COPY ./ros2_ws /app/ros2_ws
-WORKDIR /app/ros2_ws/src/sweep_ros/scripts
-RUN ./install_sweep_sdk.sh
 # Start remove blocking input() from firmware check file
 WORKDIR /app/ros2_ws/src/rvr_node/sphero_sdk_wrapper/sphero_sdk_raspberry_python/sphero_sdk/common/firmware
 RUN sed -i '/input()/d' cms_fw_check_base.py
