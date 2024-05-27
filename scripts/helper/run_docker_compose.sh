@@ -13,9 +13,10 @@ popd () {
 # By default, we do not want to mock the RVR interface or build the container image
 mock_rvr_val="false"
 shouldbuild=false
+ros_domain_id="0"
 
 # Start process option flags if present
-while getopts "bm" flag
+while getopts "bmr:" flag
 do
     case "${flag}" in
         b) 
@@ -25,6 +26,10 @@ do
         m) 
             echo "Mocking the RVR interface"
             mock_rvr_val="true"
+            ;;
+        r) 
+            echo "Setting ROS domain ID to ${OPTARG}"
+            ros_domain_id="${OPTARG}"  	
             ;;
     esac
 done
@@ -36,9 +41,9 @@ reporoot=$(git rev-parse --show-toplevel)
 # start docker compose, should run from the repo root directory, then return to the pwd on exit
 pushd $reporoot
 if $shouldbuild; then
-    trap "MOCK_RVR=$mock_rvr_val docker compose up --build" EXIT
+    trap "MOCK_RVR=$mock_rvr_val ROS_DOMAIN_ID=$ros_domain_id docker compose up --build" EXIT
 else
-    trap "MOCK_RVR=$mock_rvr_val docker compose up" EXIT
+    trap "MOCK_RVR=$mock_rvr_val ROS_DOMAIN_ID=$ros_domain_id docker compose up" EXIT
 fi
 popd
 # end docker compose
