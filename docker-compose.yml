@@ -5,12 +5,13 @@ services:
         build:
             context: ./
             dockerfile: Dockerfile
-        image: esimkowitz/sphero-rvr-ros2:latest
         privileged: true
-        ports:
-          - '8080:8080'
         command: ros2 launch rvr_bringup portal_and_server.launch.py
         environment:
           - MOCK_RVR=${MOCK_RVR:-false}
+          - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
         volumes:
           - /dev:/dev
+        network_mode: "host"
+        ipc: "host"
+        pid: "host"

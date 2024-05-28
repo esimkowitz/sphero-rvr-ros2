@@ -13,6 +13,7 @@ The rvr_node node supports the following commands:
 - Start the RVR rolling in a given heading using the `rvr_start_roll` topic.
 - Stop the RVR using the `rvr_stop_roll` topic.
 - Adjust the RVR heading using the `change_heading` action.
+- Ability to publish to the ROS2 topics anywhere on the network (provided you are on the same domain id as the RVR)
 
 The robot_control node hosts a Flask website for sending commands remotely to the RVR. [See below](#control-using-the-robot_control-webpage) for more information.
 
@@ -34,6 +35,9 @@ The script specifies two optional flags:
 
 - `-b`: Specifies whether to build the container image from source. By default, the script will use the version from Docker Hub.
 - `-m`: Specifies whether to mock the RVR interface, which is useful when testing functionality off of the Raspberry Pi, such as on your development computer. By default, the interface is not mocked.
+
+and one optional parameter:
+- `-r`: Specifies which ROS2 Domain ID you want your RVR to be registered on. Default is 0.
 
 The [docker-compose.yml](docker-compose.yml) file has the details on the run configuration, it functions the same as the command [below](#running-directly-via-docker) except without an interactive shell.
 

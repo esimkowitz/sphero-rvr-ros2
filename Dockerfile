@@ -1,4 +1,6 @@
 FROM arm64v8/ros:humble-ros-base AS base
+ENV ROS_DOMAIN_ID=0
+
 SHELL [ "/bin/bash", "-c" ]
 RUN apt-get update && apt-get install -y python3 python3-pip && apt autoremove && apt clean
 ENV PYTHONWARNINGS ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources
